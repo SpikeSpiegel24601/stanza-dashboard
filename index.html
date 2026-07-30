@@ -20,6 +20,34 @@
   </div>
 </div>
 
+<div id="appt-modal" style="display:none; position:fixed; inset:0; z-index:9000; background:rgba(15,23,42,.5); align-items:center; justify-content:center;">
+  <div style="background:#fff; border-radius:14px; padding:28px; width:340px; max-width:90vw;">
+    <div style="font-weight:700; font-size:16px; margin-bottom:2px;">Agendar cita</div>
+    <div style="font-size:12.5px; color:#64748b; margin-bottom:12px;" id="appt-lead-name">-</div>
+    <label style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">Contacto</label>
+    <select id="appt-lead-select" style="width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:10px; font-size:13px;">
+      <option value="">— Sin contacto (cita libre) —</option>
+    </select>
+    <div id="appt-free-title-wrap">
+      <label style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">Título</label>
+      <input type="text" id="appt-free-title" placeholder="Ej. Llamada con proveedor" style="width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:10px; font-size:13px;">
+    </div>
+    <label style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">Fecha</label>
+    <input type="date" id="appt-date" style="width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:10px; font-size:13px;">
+    <label style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">Hora</label>
+    <input type="time" id="appt-time" value="10:00" style="width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:10px; font-size:13px;">
+    <label style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">Duración (minutos)</label>
+    <input type="number" id="appt-duration" value="60" min="15" step="15" style="width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:10px; font-size:13px;">
+    <label style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">Notas (opcional)</label>
+    <textarea id="appt-notes" rows="2" style="width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:14px; font-size:13px; resize:vertical;"></textarea>
+    <div style="display:flex; gap:8px;">
+      <button id="appt-cancel" style="flex:1; padding:10px; border-radius:8px; border:1px solid #e2e8f0; background:#fff; font-weight:600; font-size:13px; cursor:pointer;">Cancelar</button>
+      <button id="appt-confirm" style="flex:1; padding:10px; border-radius:8px; border:none; background:#0f172a; color:#fff; font-weight:600; font-size:13px; cursor:pointer;">Confirmar</button>
+    </div>
+    <div id="appt-status" style="font-size:12px; margin-top:10px; min-height:16px;"></div>
+  </div>
+</div>
+
 <div class="sidebar">
   <div class="logo">VD</div>
   <div class="nav-item active" data-page="home"><i data-lucide="home"></i><span class="tooltip">Home</span></div>
@@ -151,6 +179,7 @@
               <span class="chat-status-pill" id="chat-status-pill">Asignado</span>
               <span class="chat-crm-pill" id="chat-crm-pill"><i data-lucide="check" style="width:11px;height:11px;"></i> CRM Actualizado</span>
               <span class="muted" style="font-size:12px; display:flex; align-items:center; gap:4px;"><i data-lucide="message-circle" style="width:13px;height:13px;"></i><span id="chat-msg-count">0</span></span>
+              <button class="btn" id="chat-schedule-btn" style="display:flex; align-items:center; gap:4px; padding:4px 10px; font-size:11px; white-space:nowrap;"><i data-lucide="calendar-plus" style="width:13px;height:13px;"></i> Agendar cita</button>
               <i data-lucide="search" style="width:15px;height:15px; color:var(--muted);"></i>
             </div>
           </div>
@@ -234,8 +263,23 @@
     </section>
 
     <section class="page" id="page-calendar">
-      <h1 style="margin-bottom:16px;">Calendario</h1>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <h1 style="margin:0;">Calendario</h1>
+          <button class="btn" id="cal-today-btn">Hoy</button>
+          <button class="btn" id="cal-prev-btn" style="padding:6px 10px;"><i data-lucide="chevron-left" style="width:14px;height:14px;"></i></button>
+          <button class="btn" id="cal-next-btn" style="padding:6px 10px;"><i data-lucide="chevron-right" style="width:14px;height:14px;"></i></button>
+          <span class="muted" id="cal-range-label" style="font-size:13px; font-weight:600;">-</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <span class="pill" id="cal-conn-pill" style="background:#f1f5f9; color:var(--muted);"><i data-lucide="calendar" style="width:11px;height:11px; vertical-align:-1px;"></i> Backend no configurado</span>
+          <button class="btn active" data-cal-view="semana">Semana</button>
+          <button class="btn" data-cal-view="dia">Día</button>
+          <button class="btn" id="cal-new-btn" style="background:var(--magenta); color:#fff; border-color:var(--magenta);"><i data-lucide="plus" style="width:13px;height:13px; vertical-align:-2px;"></i> Nueva cita</button>
+        </div>
+      </div>
       <div class="cal-grid" id="cal-grid"></div>
+      <div class="muted" id="cal-status" style="margin-top:10px; font-size:12px;"></div>
     </section>
 
     <section class="page" id="page-marketing">
@@ -601,11 +645,13 @@
   .file-card{border:1px solid var(--border); border-radius:10px; padding:12px; font-size:12px;}
 
   /* CALENDAR */
-  .cal-grid{display:grid; grid-template-columns:60px repeat(5,1fr); border:1px solid var(--border); border-radius:14px; overflow:hidden;}
+  .cal-grid{display:grid; grid-template-columns:60px repeat(7,1fr); border:1px solid var(--border); border-radius:14px; overflow:hidden;}
+  .cal-grid.cal-grid-dia{grid-template-columns:60px 1fr;}
   .cal-cell{border-bottom:1px solid var(--border); border-right:1px solid var(--border); padding:6px; font-size:11px; min-height:52px; position:relative;}
   .cal-head{background:var(--card); font-weight:700; text-align:center; padding:10px; font-size:12px;}
+  .cal-head.cal-head-today{color:var(--magenta);}
   .cal-time{background:var(--card); color:var(--muted); text-align:center; font-size:11px; padding:6px;}
-  .appt{background:var(--magenta-light); color:var(--magenta); border-radius:6px; padding:4px 6px; font-size:10px; font-weight:600;}
+  .appt{background:var(--magenta-light); color:var(--magenta); border-radius:6px; padding:4px 6px; font-size:10px; font-weight:600; margin-bottom:3px; cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 
   /* TEAM */
   .team-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
@@ -1209,6 +1255,7 @@
       renderKB();
       renderFiles();
       renderPlayground();
+      loadCalendarEvents();
       if(status){ status.textContent = 'Datos en vivo — ' + leads.length + ' leads (Airtable)'; }
       if(window.lucide){ window.lucide.createIcons(); }
     }).catch(function(err){
@@ -1421,32 +1468,260 @@
     if(window.lucide) window.lucide.createIcons();
   }
 
-  // CALENDAR
-  function renderCalendar(){
+  // CALENDAR (real, conectado a Google Calendar vía el backend)
+  var CAL_DAY_NAMES = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  var CAL_MONTH_NAMES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  var CAL_HOURS = [8,9,10,11,12,13,14,15,16,17,18,19,20,21];
+  var calViewMode = 'semana';
+  var calAnchorDate = new Date();
+  var calEvents = [];
+
+  function getBackendBase(){
+    return SIMULATE_API_URL ? SIMULATE_API_URL.replace(/\/simulate\/next\/?$/, '') : '';
+  }
+
+  function calStartOfDay(d){ var x = new Date(d); x.setHours(0,0,0,0); return x; }
+
+  function calRangeForView(){
+    var anchor = calStartOfDay(calAnchorDate);
+    if(calViewMode === 'dia'){
+      var end = new Date(anchor); end.setDate(end.getDate()+1);
+      return {start: anchor, end: end, days: [new Date(anchor)]};
+    }
+    // semana: Lunes a Domingo
+    var dow = anchor.getDay(); // 0=Dom..6=Sáb
+    var diffToMonday = (dow === 0 ? -6 : 1 - dow);
+    var monday = new Date(anchor); monday.setDate(monday.getDate() + diffToMonday);
+    var days = [];
+    for(var i=0;i<7;i++){ var d = new Date(monday); d.setDate(d.getDate()+i); days.push(d); }
+    var weekEnd = new Date(monday); weekEnd.setDate(weekEnd.getDate()+7);
+    return {start: monday, end: weekEnd, days: days};
+  }
+
+  function fmtRangeLabel(range){
+    var d1 = range.days[0], d2 = range.days[range.days.length-1];
+    if(calViewMode === 'dia'){
+      return d1.getDate() + ' ' + CAL_MONTH_NAMES[d1.getMonth()] + ' ' + d1.getFullYear();
+    }
+    return d1.getDate() + ' ' + CAL_MONTH_NAMES[d1.getMonth()] + ' – ' + d2.getDate() + ' ' + CAL_MONTH_NAMES[d2.getMonth()] + ' ' + d2.getFullYear();
+  }
+
+  function loadCalendarEvents(){
+    var statusEl = document.getElementById('cal-status');
+    var pillEl = document.getElementById('cal-conn-pill');
+    var backendBase = getBackendBase();
+    var range = calRangeForView();
+    document.getElementById('cal-range-label').textContent = fmtRangeLabel(range);
+    if(!backendBase){
+      pillEl.innerHTML = '<i data-lucide="calendar-x" style="width:11px;height:11px; vertical-align:-1px;"></i> Backend no configurado';
+      pillEl.style.background = '#fee2e2'; pillEl.style.color = '#b91c1c';
+      calEvents = [];
+      renderCalendarGrid(range);
+      if(window.lucide) window.lucide.createIcons();
+      return;
+    }
+    var token = localStorage.getItem('stanza_session_token');
+    statusEl.textContent = 'Cargando citas...';
+    fetch(backendBase + '/calendar/events?timeMin=' + encodeURIComponent(range.start.toISOString()) + '&timeMax=' + encodeURIComponent(range.end.toISOString()), {
+      headers: {'X-Session-Token': token || ''}
+    }).then(function(r){ return r.json().then(function(data){ return {ok:r.ok, data:data}; }); })
+      .then(function(res){
+        if(res.ok){
+          calEvents = res.data.events || [];
+          pillEl.innerHTML = '<i data-lucide="check-circle" style="width:11px;height:11px; vertical-align:-1px;"></i> Google Calendar conectado';
+          pillEl.style.background = '#dcfce7'; pillEl.style.color = '#15803d';
+          statusEl.textContent = calEvents.length + ' cita(s) en este rango.';
+        } else {
+          calEvents = [];
+          pillEl.innerHTML = '<i data-lucide="calendar-x" style="width:11px;height:11px; vertical-align:-1px;"></i> Error de configuración';
+          pillEl.style.background = '#fee2e2'; pillEl.style.color = '#b91c1c';
+          statusEl.textContent = (res.data && res.data.error) || 'No se pudieron cargar las citas.';
+        }
+        renderCalendarGrid(range);
+        if(window.lucide) window.lucide.createIcons();
+      }).catch(function(){
+        calEvents = [];
+        pillEl.innerHTML = '<i data-lucide="calendar-x" style="width:11px;height:11px; vertical-align:-1px;"></i> Sin conexión';
+        pillEl.style.background = '#fee2e2'; pillEl.style.color = '#b91c1c';
+        statusEl.textContent = 'Error de conexión con el backend.';
+        renderCalendarGrid(range);
+        if(window.lucide) window.lucide.createIcons();
+      });
+  }
+
+  function renderCalendarGrid(range){
     var grid = document.getElementById('cal-grid');
+    grid.classList.toggle('cal-grid-dia', calViewMode === 'dia');
     grid.innerHTML = '';
-    var days = ['Lun 12','Mar 13','Mié 14','Jue 15','Vie 16'];
-    var hours = ['9:00','10:00','11:00','12:00','13:00','14:00'];
+    var days = range.days;
+    var today = calStartOfDay(new Date()).getTime();
+
     grid.appendChild(Object.assign(document.createElement('div'), {className:'cal-head', textContent:''}));
-    days.forEach(function(d){ grid.appendChild(Object.assign(document.createElement('div'), {className:'cal-head', textContent:d})); });
-    var appts = {'10:00_1':'María López - Showroom', '11:00_3':'Carlos Ruiz - Tour Virtual', '13:00_0':'Pedro Ríos - Follow-up', '14:00_4':'Roberto Díaz - Tour'};
-    hours.forEach(function(h){
-      grid.appendChild(Object.assign(document.createElement('div'), {className:'cal-time', textContent:h}));
-      for(var i=0;i<5;i++){
+    days.forEach(function(d){
+      var head = document.createElement('div');
+      head.className = 'cal-head' + (d.getTime() === today ? ' cal-head-today' : '');
+      head.textContent = CAL_DAY_NAMES[d.getDay()] + ' ' + d.getDate();
+      grid.appendChild(head);
+    });
+
+    // Agrupa eventos por día + hora de inicio (solo eventos con hora, no de todo el día)
+    function eventsFor(day, hour){
+      return calEvents.filter(function(ev){
+        if(!ev.start) return false;
+        var start = new Date(ev.start);
+        return start.getFullYear() === day.getFullYear() && start.getMonth() === day.getMonth() &&
+          start.getDate() === day.getDate() && start.getHours() === hour;
+      });
+    }
+
+    CAL_HOURS.forEach(function(h){
+      grid.appendChild(Object.assign(document.createElement('div'), {className:'cal-time', textContent:(h<10?'0':'')+h+':00'}));
+      days.forEach(function(day){
         var cell = document.createElement('div');
         cell.className = 'cal-cell';
-        var key = h+'_'+i;
-        if(appts[key]){
+        eventsFor(day, h).forEach(function(ev){
           var a = document.createElement('div');
           a.className = 'appt';
-          a.textContent = appts[key];
+          var start = new Date(ev.start);
+          var hh = (start.getHours()<10?'0':'')+start.getHours();
+          var mm = (start.getMinutes()<10?'0':'')+start.getMinutes();
+          a.textContent = hh+':'+mm+' '+ev.summary;
+          a.title = ev.summary + (ev.description ? ('\n'+ev.description) : '');
+          a.addEventListener('click', function(){ if(ev.htmlLink) window.open(ev.htmlLink, '_blank'); });
           cell.appendChild(a);
-        }
+        });
         grid.appendChild(cell);
-      }
+      });
     });
   }
-  renderCalendar();
+
+  document.getElementById('cal-today-btn').addEventListener('click', function(){ calAnchorDate = new Date(); loadCalendarEvents(); });
+  document.getElementById('cal-prev-btn').addEventListener('click', function(){
+    var d = new Date(calAnchorDate); d.setDate(d.getDate() - (calViewMode==='dia'?1:7)); calAnchorDate = d; loadCalendarEvents();
+  });
+  document.getElementById('cal-next-btn').addEventListener('click', function(){
+    var d = new Date(calAnchorDate); d.setDate(d.getDate() + (calViewMode==='dia'?1:7)); calAnchorDate = d; loadCalendarEvents();
+  });
+  document.querySelectorAll('[data-cal-view]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('[data-cal-view]').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      calViewMode = btn.dataset.calView;
+      loadCalendarEvents();
+    });
+  });
+  document.querySelectorAll('.nav-item').forEach(function(item){
+    if(item.dataset.page === 'calendar'){
+      item.addEventListener('click', function(){ loadCalendarEvents(); });
+    }
+  });
+
+  // MODAL: Agendar cita (se usa desde Chats con un lead ya elegido, o desde
+  // Calendario para una cita libre / con cualquier contacto).
+  function fmtDateInput(d){
+    var yyyy = d.getFullYear(), mm = String(d.getMonth()+1).padStart(2,'0'), dd = String(d.getDate()).padStart(2,'0');
+    return yyyy+'-'+mm+'-'+dd;
+  }
+
+  function populateApptLeadSelect(selectedId){
+    var sel = document.getElementById('appt-lead-select');
+    sel.innerHTML = '<option value="">— Sin contacto (cita libre) —</option>';
+    leads.forEach(function(l){
+      var opt = document.createElement('option');
+      opt.value = l.id;
+      opt.textContent = l.name + (l.phone ? ' · ' + l.phone : '');
+      sel.appendChild(opt);
+    });
+    sel.value = selectedId || '';
+    toggleApptFreeTitle();
+  }
+
+  function toggleApptFreeTitle(){
+    var sel = document.getElementById('appt-lead-select');
+    var wrap = document.getElementById('appt-free-title-wrap');
+    wrap.style.display = sel.value ? 'none' : 'block';
+  }
+
+  document.getElementById('appt-lead-select').addEventListener('change', toggleApptFreeTitle);
+
+  function openApptModal(preselectLeadId, defaultDate){
+    populateApptLeadSelect(preselectLeadId);
+    var lead = preselectLeadId ? leads.find(function(l){return l.id===preselectLeadId;}) : null;
+    document.getElementById('appt-lead-name').textContent = lead ? (lead.name + (lead.phone ? ' · ' + lead.phone : '')) : 'Nueva cita';
+    document.getElementById('appt-free-title').value = '';
+    document.getElementById('appt-date').value = fmtDateInput(defaultDate || new Date());
+    document.getElementById('appt-time').value = '10:00';
+    document.getElementById('appt-duration').value = 60;
+    document.getElementById('appt-notes').value = '';
+    document.getElementById('appt-status').textContent = '';
+    document.getElementById('appt-modal').style.display = 'flex';
+  }
+
+  document.getElementById('chat-schedule-btn').addEventListener('click', function(){
+    if(!activeId) return;
+    openApptModal(activeId, new Date());
+  });
+
+  document.getElementById('cal-new-btn').addEventListener('click', function(){
+    openApptModal(null, calAnchorDate);
+  });
+
+  document.getElementById('appt-cancel').addEventListener('click', function(){
+    document.getElementById('appt-modal').style.display = 'none';
+  });
+
+  document.getElementById('appt-confirm').addEventListener('click', function(){
+    var selectedLeadId = document.getElementById('appt-lead-select').value;
+    var lead = selectedLeadId ? leads.find(function(l){return l.id===selectedLeadId;}) : null;
+    var dateVal = document.getElementById('appt-date').value;
+    var timeVal = document.getElementById('appt-time').value;
+    var duration = parseInt(document.getElementById('appt-duration').value, 10) || 60;
+    var notes = document.getElementById('appt-notes').value.trim();
+    var freeTitle = document.getElementById('appt-free-title').value.trim();
+    var statusEl = document.getElementById('appt-status');
+    if(!dateVal || !timeVal){ statusEl.style.color = '#dc2626'; statusEl.textContent = 'Falta fecha u hora.'; return; }
+    var leadName = lead ? lead.name : (freeTitle || 'Cita');
+    var leadPhone = lead ? lead.phone : '';
+    var backendBase = getBackendBase();
+    if(!backendBase){ statusEl.style.color = '#dc2626'; statusEl.textContent = 'Backend no configurado todavía.'; return; }
+    var token = localStorage.getItem('stanza_session_token');
+    var start = new Date(dateVal + 'T' + timeVal + ':00');
+    var end = new Date(start.getTime() + duration*60000);
+    statusEl.style.color = '#64748b';
+    statusEl.textContent = 'Agendando...';
+    fetch(backendBase + '/appointments', {
+      method:'POST',
+      headers:{'Content-Type':'application/json', 'X-Session-Token': token || ''},
+      body: JSON.stringify({ leadName: leadName, leadPhone: leadPhone, startISO: start.toISOString(), endISO: end.toISOString(), notes: notes })
+    }).then(function(r){ return r.json().then(function(data){ return {ok:r.ok, data:data}; }); })
+      .then(function(res){
+        if(res.ok){
+          statusEl.style.color = '#15803d';
+          statusEl.textContent = '✓ Cita creada en Google Calendar';
+          var after = function(){
+            if(document.getElementById('page-calendar').classList.contains('active')) loadCalendarEvents();
+            setTimeout(function(){ document.getElementById('appt-modal').style.display = 'none'; }, 1000);
+          };
+          if(lead){
+            updateLeadStage(lead.id, 'cita').then(function(){
+              lead.stage = 'cita';
+              lead.tag = STAGE_TAGS['cita'];
+              if(activeId === lead.id){ renderChatPanel(); }
+              renderChatList();
+              after();
+            }).catch(after);
+          } else {
+            after();
+          }
+        } else {
+          statusEl.style.color = '#dc2626';
+          statusEl.textContent = (res.data && res.data.error) || 'No se pudo agendar';
+        }
+      }).catch(function(){
+        statusEl.style.color = '#dc2626';
+        statusEl.textContent = 'Error de conexión con el backend';
+      });
+  });
 
   // MATRIX (calculada de leads reales agrupados por fuente)
   function renderMatrix(){
