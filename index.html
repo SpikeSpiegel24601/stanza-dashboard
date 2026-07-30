@@ -8,6 +8,18 @@
 </head>
 <body>
 
+<div id="access-gate" style="position:fixed;inset:0;z-index:99999;background:#0f172a;display:flex;align-items:center;justify-content:center;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">
+  <div style="background:#ffffff;border-radius:14px;padding:36px 32px;width:320px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.35);">
+    <div style="font-weight:700;font-size:20px;margin-bottom:4px;color:#0f172a;">VentaDirecta IA</div>
+    <div style="font-size:13px;color:#64748b;margin-bottom:20px;">Acceso restringido — inicia sesión</div>
+    <input id="gate-user" type="text" placeholder="Usuario" autocomplete="username" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:10px;font-size:14px;">
+    <input id="gate-pass" type="password" placeholder="Contraseña" autocomplete="current-password" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:14px;font-size:14px;">
+    <button id="gate-submit" style="width:100%;padding:11px;border:none;border-radius:8px;background:#0f172a;color:#fff;font-weight:600;font-size:14px;cursor:pointer;">Entrar</button>
+    <div id="gate-error" style="color:#dc2626;font-size:12.5px;margin-top:10px;min-height:16px;"></div>
+    <div id="gate-hint" style="color:#94a3b8;font-size:11.5px;margin-top:8px;"></div>
+  </div>
+</div>
+
 <div class="sidebar">
   <div class="logo">VD</div>
   <div class="nav-item active" data-page="home"><i data-lucide="home"></i><span class="tooltip">Home</span></div>
@@ -1579,6 +1591,67 @@
   });
 
   init();
+</script>
+
+<script>
+(function(){
+  var gate = document.getElementById('access-gate');
+  var userInput = document.getElementById('gate-user');
+  var passInput = document.getElementById('gate-pass');
+  var submitBtn = document.getElementById('gate-submit');
+  var errorEl = document.getElementById('gate-error');
+  var hintEl = document.getElementById('gate-hint');
+
+  var backendBase = (typeof SIMULATE_API_URL !== 'undefined' && SIMULATE_API_URL)
+    ? SIMULATE_API_URL.replace(/\/simulate\/next\/?$/, '')
+    : '';
+
+  function unlock(){ gate.style.display = 'none'; }
+
+  if(!backendBase){
+    hintEl.textContent = 'Backend de acceso no configurado todavía.';
+  }
+
+  var savedToken = localStorage.getItem('stanza_session_token');
+  if(savedToken && backendBase){
+    fetch(backendBase + '/verify', { headers: { 'X-Session-Token': savedToken } })
+      .then(function(r){ return r.json(); })
+      .then(function(data){ if(data && data.valid){ unlock(); } })
+      .catch(function(){ /* si falla, se queda el candado */ });
+  }
+
+  function attemptLogin(){
+    var username = userInput.value.trim();
+    var password = passInput.value;
+    if(!username || !password) return;
+    if(!backendBase){
+      errorEl.textContent = 'Falta configurar el backend de acceso.';
+      return;
+    }
+    submitBtn.disabled = true;
+    errorEl.textContent = '';
+    fetch(backendBase + '/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: username, password: password })
+    }).then(function(r){ return r.json().then(function(data){ return {ok: r.ok, data: data}; }); })
+      .then(function(res){
+        submitBtn.disabled = false;
+        if(res.ok && res.data && res.data.token){
+          localStorage.setItem('stanza_session_token', res.data.token);
+          unlock();
+        } else {
+          errorEl.textContent = (res.data && res.data.error) || 'No se pudo iniciar sesión';
+        }
+      }).catch(function(){
+        submitBtn.disabled = false;
+        errorEl.textContent = 'Error de conexión con el backend';
+      });
+  }
+
+  submitBtn.addEventListener('click', attemptLogin);
+  passInput.addEventListener('keydown', function(e){ if(e.key === 'Enter') attemptLogin(); });
+})();
 </script>
 
 </body>
