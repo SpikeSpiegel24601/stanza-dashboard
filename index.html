@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<script src="https://unpkg.com/lucide@latest"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard - VentaDirecta IA</title>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="logo">VD</div>
+  <div class="nav-item active" data-page="home"><i data-lucide="home"></i><span class="tooltip">Home</span></div>
+  <div class="nav-item" data-page="chats"><i data-lucide="message-circle"></i><span class="tooltip">Chats</span></div>
+  <div class="nav-item" data-page="contacts"><i data-lucide="id-card"></i><span class="tooltip">Contactos</span></div>
+  <div class="nav-item" data-page="kanban"><i data-lucide="layout-grid"></i><span class="tooltip">Kanban</span></div>
+  <div class="nav-item" data-page="calendar"><i data-lucide="calendar"></i><span class="tooltip">Calendar</span></div>
+  <div class="nav-item" data-page="marketing"><i data-lucide="send"></i><span class="tooltip">Marketing</span></div>
+  <div class="nav-item" data-page="team"><i data-lucide="users"></i><span class="tooltip">Team</span></div>
+  <div class="nav-item" data-page="sales-assistant"><i data-lucide="briefcase"></i><span class="tooltip">Asistente</span></div>
+  <div class="nav-item" data-page="integrations"><i data-lucide="database"></i><span class="tooltip">Integraciones</span></div>
+</div>
+
+<main>
+  <header>
+    <i data-lucide="inbox" style="color:var(--muted); cursor:pointer;"></i>
+    <i data-lucide="bell" style="color:var(--muted); cursor:pointer;"></i>
+    <div style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+      <div class="avatar">AL</div>
+      <div style="text-align:left; line-height:1.2;">
+        <div style="font-size:13px; font-weight:700;">Arturo</div>
+        <div class="muted" style="font-size:11px;">Stanza Vertical Living</div>
+      </div>
+      <i data-lucide="chevron-down" style="color:var(--muted); width:14px; height:14px;"></i>
+    </div>
+  </header>
+  <div class="content">
+
+    <section class="page active" id="page-home">
+      <div class="top-bar">
+        <div>
+          <div class="muted">miércoles, 29 de julio de 2026</div>
+          <h1>Bienvenido, Arturo Lopez</h1>
+          <div class="muted" id="sync-status" style="margin-top:4px;">Conectando con Airtable…</div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn active">Nuevos</button>
+          <button class="btn">Activos</button>
+          <button class="btn"><i data-lucide="calendar" style="width:14px;height:14px;vertical-align:-2px;"></i> julio 2026</button>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-icon" style="background:#fbe6f5; color:var(--magenta);"><i data-lucide="users"></i></div><div class="label">Leads totales</div><div class="value" id="stat-total">–</div><div class="muted" style="font-size:11px;">leads nuevos</div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#dbeafe; color:var(--blue);"><i data-lucide="phone"></i></div><div class="label">Tasa de Contactos</div><div class="value" id="stat-contact-rate">–</div><div class="delta" id="stat-contact-count">– leads</div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#ffedd5; color:#c2410c;"><i data-lucide="target"></i></div><div class="label">Tasa de Calificados</div><div class="value" id="stat-qualified-rate">–</div><div class="delta" id="stat-qualified-count">– leads</div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#ede9fe; color:var(--purple);"><i data-lucide="calendar"></i></div><div class="label">Tasa de Citas</div><div class="value" id="stat-appt-rate">–</div><div class="delta" id="stat-appt-count">– leads</div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#dcfce7; color:#15803d;"><i data-lucide="footprints"></i></div><div class="label">Tasa de Visitas</div><div class="value">0.0%</div><div class="muted" style="font-size:11px;">0 leads · sin datos aún</div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#ccfbf1; color:#0f766e;"><i data-lucide="clipboard-check"></i></div><div class="label">Tasa de Separaciones</div><div class="value">0.0%</div><div class="muted" style="font-size:11px;">0 leads · sin datos aún</div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#dbeafe; color:#1e3a8a;"><i data-lucide="shopping-cart"></i></div><div class="label">Tasa de Ventas</div><div class="value">0.0%</div><div class="muted" style="font-size:11px;">0 leads · sin datos aún</div></div>
+      </div>
+
+      <div class="grid3">
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <h2 class="section" style="margin-bottom:0;">Embudo de ventas</h2>
+            <select class="btn" style="cursor:pointer;">
+              <option>Cronológico</option>
+              <option>Por conversión</option>
+            </select>
+          </div>
+          <div class="funnel-row"><div class="funnel-label">Nuevo Lead</div><div class="funnel-bar-track"><div class="funnel-bar-fill" id="funnel-fill-nuevo" style="width:0%; background:var(--blue);"></div></div><div class="funnel-val" id="funnel-val-nuevo">–</div></div>
+          <div class="funnel-row"><div class="funnel-label">No Contesto</div><div class="funnel-bar-track"><div class="funnel-bar-fill" style="width:0%; background:var(--muted);"></div></div><div class="funnel-val">0 (0.0%)</div></div>
+          <div class="funnel-row"><div class="funnel-label">Contactado</div><div class="funnel-bar-track"><div class="funnel-bar-fill" id="funnel-fill-contactado" style="width:0%; background:var(--magenta);"></div></div><div class="funnel-val" id="funnel-val-contactado">–</div></div>
+          <div class="funnel-row"><div class="funnel-label">Interesado</div><div class="funnel-bar-track"><div class="funnel-bar-fill" id="funnel-fill-interesado" style="width:0%; background:var(--amber);"></div></div><div class="funnel-val" id="funnel-val-interesado">–</div></div>
+          <div class="funnel-row"><div class="funnel-label">Cita</div><div class="funnel-bar-track"><div class="funnel-bar-fill" id="funnel-fill-cita" style="width:0%; background:var(--purple);"></div></div><div class="funnel-val" id="funnel-val-cita">–</div></div>
+          <div class="funnel-row"><div class="funnel-label">Desperfilado</div><div class="funnel-bar-track"><div class="funnel-bar-fill" id="funnel-fill-desperfilado" style="width:0%; background:var(--red);"></div></div><div class="funnel-val" id="funnel-val-desperfilado">–</div></div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div class="card">
+            <h2 class="section">¿Quién Atiende?</h2>
+            <div class="stack-bar">
+              <div class="stack-seg" style="width:4.3%; background:var(--blue);"></div>
+              <div class="stack-seg" style="width:87%; background:var(--amber);">87%</div>
+              <div class="stack-seg" style="width:8.7%; background:var(--muted);"></div>
+            </div>
+            <div class="legend-item"><i data-lucide="bot" style="width:14px; height:14px; color:var(--blue);"></i> IA 4.3% (1)</div>
+            <div class="legend-item"><i data-lucide="user" style="width:14px; height:14px; color:var(--amber);"></i> Humano 87.0% (20)</div>
+            <div class="legend-item"><i data-lucide="x-circle" style="width:14px; height:14px; color:var(--muted);"></i> Descartado 8.7% (2)</div>
+          </div>
+          <div class="card">
+            <h2 class="section">Métricas Secundarias</h2>
+            <div class="secondary-row" style="background:#fee2e2;"><span><i data-lucide="user-x" style="width:14px; height:14px; vertical-align:-2px; color:#b91c1c;"></i> No Aceptó Contacto</span><b style="color:#b91c1c;">4.3% <span class="muted" style="font-weight:400;">(1)</span></b></div>
+            <div class="secondary-row" style="background:#ccfbf1; margin-bottom:0;"><span><i data-lucide="building-2" style="width:14px; height:14px; vertical-align:-2px; color:#0f766e;"></i> Brokers</span><b style="color:#0f766e;">8.7% <span class="muted" style="font-weight:400;">(2)</span></b></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="section">Motivo de Descarte</h2>
+          <div class="discard-bar-row">
+            <div class="discard-bar-label"><span>Spam</span><b>1 (50.0%)</b></div>
+            <div class="discard-bar-track"><div class="discard-bar-fill" style="width:100%;"></div></div>
+          </div>
+          <div class="discard-bar-row">
+            <div class="discard-bar-label"><span>Proveedor/Vendedor</span><b>1 (50.0%)</b></div>
+            <div class="discard-bar-track"><div class="discard-bar-fill" style="width:100%;"></div></div>
+          </div>
+          <div class="muted" style="font-size:12px;">Sin interés: 0%</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-chats">
+      <div class="chats-topbar">
+        <h1 style="margin:0;">Chats</h1>
+        <button class="btn" id="chats-filtros-btn"><i data-lucide="filter" style="width:14px;height:14px; vertical-align:-2px;"></i> Filtros</button>
+      </div>
+      <div class="chats-layout">
+        <div class="chat-list-wrap">
+          <div class="chat-search-wrap">
+            <input type="text" id="chats-search" placeholder="Buscar conversaciones..." />
+            <i data-lucide="search" class="chat-search-icon"></i>
+          </div>
+          <div class="chat-list" id="chat-list"></div>
+        </div>
+        <div class="chat-panel">
+          <div class="chat-header">
+            <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+              <div style="font-weight:700;" id="chat-name">Luis Armando Trejo</div>
+              <span class="chat-tag" id="chat-tag">Nuevo Lead</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="muted" style="font-size:12px;">IA</span>
+                <div class="switch on" id="ai-switch"><div class="knob"></div></div>
+              </div>
+              <span class="muted" style="font-size:12px;">Status:</span>
+              <span class="chat-status-pill" id="chat-status-pill">Asignado</span>
+              <span class="chat-crm-pill" id="chat-crm-pill"><i data-lucide="check" style="width:11px;height:11px;"></i> CRM Actualizado</span>
+              <span class="muted" style="font-size:12px; display:flex; align-items:center; gap:4px;"><i data-lucide="message-circle" style="width:13px;height:13px;"></i><span id="chat-msg-count">0</span></span>
+              <i data-lucide="search" style="width:15px;height:15px; color:var(--muted);"></i>
+            </div>
+          </div>
+          <div class="chat-messages" id="chat-messages"></div>
+          <div class="ai-lock-banner" id="ai-lock-banner"><i data-lucide="lock" style="width:13px;height:13px; vertical-align:-2px;"></i> La IA está habilitada. Desactívala para enviar mensajes manualmente.</div>
+          <div class="chat-input">
+            <i data-lucide="paperclip" class="chat-attach-icon"></i>
+            <input type="text" id="msg-input" placeholder="Escribe un mensaje..." />
+            <button class="chat-send-btn" id="send-btn"><i data-lucide="send"></i></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-contacts">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+        <div style="position:relative; flex:1; min-width:240px; max-width:360px;">
+          <input type="text" id="contacts-search" placeholder="Buscar contactos..." style="width:100%; padding:10px 14px 10px 34px; border-radius:10px; border:1px solid var(--border); font-size:13px; background:var(--card); color:var(--text);" />
+          <i data-lucide="search" style="position:absolute; left:11px; top:50%; transform:translateY(-50%); width:14px; height:14px; color:var(--muted);"></i>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <select id="contacts-stage-filter" class="btn" style="cursor:pointer;">
+            <option value="">Todas las etapas</option>
+            <option value="nuevo">Nuevo Lead</option>
+            <option value="no_contesto">No Contesto</option>
+            <option value="contactado">Contactado</option>
+            <option value="interesado">Interesado</option>
+            <option value="cita">Cita</option>
+            <option value="visita">Visita</option>
+            <option value="separacion">Separación</option>
+            <option value="venta">Venta</option>
+            <option value="desperfilado">Desperfilado</option>
+          </select>
+          <button class="btn" id="contacts-download"><i data-lucide="download"></i> Descargar</button>
+        </div>
+      </div>
+      <div class="card" style="padding:0; overflow-x:auto;">
+        <table id="contacts-table">
+          <thead>
+            <tr>
+              <th data-sort="name" style="cursor:pointer; white-space:nowrap;">Nombre ↕</th>
+              <th style="white-space:nowrap;">Correo electrónico</th>
+              <th style="white-space:nowrap;">Núm. de teléfono</th>
+              <th data-sort="stage" style="cursor:pointer; white-space:nowrap;">Etapa comercial ↕</th>
+              <th style="white-space:nowrap;">Propiedad</th>
+              <th style="white-space:nowrap;">Sincronización CRM</th>
+              <th style="white-space:nowrap;">Fuente del Lead</th>
+              <th style="white-space:nowrap;">Representante</th>
+              <th data-sort="created" style="cursor:pointer; white-space:nowrap;">Creado ↕</th>
+              <th style="white-space:nowrap;">Último Contacto</th>
+            </tr>
+          </thead>
+          <tbody id="contacts-tbody"></tbody>
+        </table>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; font-size:13px;" class="muted">
+        <span id="contacts-count">Cargando...</span>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button class="btn" id="contacts-prev">Anterior</button>
+          <span id="contacts-page-label">Página 1</span>
+          <button class="btn" id="contacts-next">Siguiente</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-kanban">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+        <div style="display:flex; gap:8px;">
+          <button class="btn" id="kanban-download"><i data-lucide="download"></i> Descargar</button>
+          <button class="btn active" data-kanban-filter="nuevos">Nuevos</button>
+          <button class="btn" data-kanban-filter="activos">Activos</button>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn"><i data-lucide="sliders-horizontal" style="width:14px;height:14px;"></i> Filtrar</button>
+          <button class="btn"><i data-lucide="calendar" style="width:14px;height:14px;"></i> julio 2026</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto; padding-bottom:8px;">
+        <div class="kanban-board" id="kanban-board"></div>
+      </div>
+    </section>
+
+    <section class="page" id="page-calendar">
+      <h1 style="margin-bottom:16px;">Calendario</h1>
+      <div class="cal-grid" id="cal-grid"></div>
+    </section>
+
+    <section class="page" id="page-marketing">
+      <div style="display:flex; gap:20px; border-bottom:1px solid var(--border); margin-bottom:16px;">
+        <div class="mkt-tab active" data-mkt-tab="panel">Panel</div>
+        <div class="mkt-tab" data-mkt-tab="mapeo">Mapeo de WhatsApp</div>
+      </div>
+
+      <div class="mkt-page active" id="mkt-panel">
+        <div class="card" style="margin-bottom:16px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+          <b style="font-size:13px; margin-right:4px;">Panel de Atribución</b>
+          <span class="pill" style="background:#dcfce7; color:#15803d;">● En vivo</span>
+          <span class="pill" style="background:#fef9c3; color:#a16207;" id="pill-sin-fuente">⚠ – sin fuente</span>
+          <span class="pill" style="background:#dcfce7; color:#15803d;" id="pill-alto">★ – Alto Rendimiento</span>
+          <span class="pill" style="background:#dbeafe; color:#1d4ed8;" id="pill-oportunidad">↗ – Oportunidad</span>
+          <span class="pill" style="background:#ffedd5; color:#c2410c;" id="pill-bajo">⚠ – Bajo Objetivo</span>
+          <span class="pill" style="background:#fee2e2; color:#b91c1c;" id="pill-revision">↘ – En Revisión</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <span class="muted" style="font-size:12px;">Ver por:</span>
+            <button class="btn" data-mkt-viewby="plataforma"><i data-lucide="grid" style="width:13px;height:13px;"></i> Plataforma</button>
+            <button class="btn" data-mkt-viewby="campana">Campaña</button>
+            <button class="btn active" data-mkt-viewby="conjunto">Conjunto de anuncios</button>
+            <button class="btn" data-mkt-viewby="anuncio">Anuncio</button>
+          </div>
+          <button class="btn"><i data-lucide="calendar" style="width:13px;height:13px;"></i> julio 2026</button>
+        </div>
+        <div class="row" style="margin-bottom:16px;">
+          <div class="card" style="flex:1; min-width:320px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <h2 class="section" style="margin-bottom:2px;">Matriz de Rendimiento <i data-lucide="info" style="width:12px;height:12px; color:var(--muted); vertical-align:2px;"></i></h2>
+              <select class="btn" style="cursor:pointer; font-size:12px;"><option>Tasa de Citas</option></select>
+            </div>
+            <div class="muted" style="margin-bottom:8px; font-size:12px;">Eje X = Volumen de Leads | Eje Y = Tasa de Citas</div>
+            <div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:8px;">
+              <span class="legend-item"><span class="dot" style="background:var(--green);"></span>Alto Rendimiento (<span id="legend-alto">0</span>)</span>
+              <span class="legend-item"><span class="dot" style="background:var(--blue);"></span>Oportunidad (<span id="legend-oportunidad">0</span>)</span>
+              <span class="legend-item"><span class="dot" style="background:var(--amber);"></span>Bajo Objetivo (<span id="legend-bajo">0</span>)</span>
+              <span class="legend-item"><span class="dot" style="background:var(--red);"></span>En Revisión (<span id="legend-revision">0</span>)</span>
+            </div>
+            <div class="matrix" id="matrix"></div>
+          </div>
+          <div class="card" style="flex:1; min-width:320px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <h2 class="section">Embudo de Conversión</h2>
+              <select class="btn" style="cursor:pointer; font-size:12px;"><option>Embudo Completo</option></select>
+            </div>
+            <div id="mkt-funnel"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h2 class="section">Desglose de Rendimiento</h2>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>Nombre</th><th>Leads</th><th>Tasa de Contactos</th><th>Tasa de Calificados</th><th>Tasa de Citas</th></tr></thead>
+              <tbody id="mkt-breakdown"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="mkt-page" id="mkt-mapeo">
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+            <h2 class="section" style="margin-bottom:0;">Seguimiento de campañas de WhatsApp</h2>
+            <button class="btn active" id="mapping-add"><i data-lucide="plus"></i> Mapear Nueva Campaña</button>
+          </div>
+          <div id="mapping-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-team">
+      <h1 style="margin-bottom:2px;">Gestión de equipo</h1>
+      <p class="muted" style="margin-bottom:16px;">Administra a los miembros del equipo y la asignación de leads.</p>
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-bottom:16px;">
+        <button class="btn active" data-team-tab="miembros"><i data-lucide="users"></i> Miembros</button>
+        <button class="btn" data-team-tab="rotacion"><i data-lucide="repeat"></i> Asignación de leads</button>
+      </div>
+
+      <div class="team-page active" id="team-miembros">
+        <div class="card" style="padding:0;">
+          <div id="team-members-list"></div>
+        </div>
+      </div>
+
+      <div class="team-page" id="team-rotacion">
+        <div class="card">
+          <div>
+            <b>Rotación Automática</b> <span class="muted" id="rotation-summary"></span>
+            <div class="muted" style="font-size:12px;">Los leads se distribuyen automáticamente entre asesores activos en rotación</div>
+          </div>
+          <div id="rotation-list" style="margin-top:12px;"></div>
+          <div class="card" style="background:#eff6ff; border-color:#bfdbfe; margin-top:12px; font-size:12px;">
+            <b>Cómo Funciona la Rotación Automática</b><br/>
+            Los leads entrantes se asignan automáticamente al siguiente asesor disponible en la rotación. Solo los asesores activos reciben leads.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-sales-assistant">
+      <h1 style="margin-bottom:2px;">Asistente de Ventas</h1>
+      <p class="muted" style="margin-bottom:16px;">Administra y prueba el conocimiento del asistente.</p>
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-bottom:16px;">
+        <button class="btn active" data-sa-tab="brief"><i data-lucide="sparkles"></i> Brief</button>
+        <button class="btn" data-sa-tab="archivos"><i data-lucide="file-text"></i> Archivos</button>
+        <button class="btn" data-sa-tab="playground"><i data-lucide="user"></i> Playground</button>
+      </div>
+
+      <div class="sa-page active" id="sa-brief">
+        <h2 class="section">Tu Base de Conocimiento</h2>
+        <p class="muted" style="margin-bottom:12px;">Revisa y edita cada sección de la base de conocimiento de tu negocio. Los cambios se guardan en Airtable.</p>
+        <div class="kb-grid" id="kb-grid"></div>
+      </div>
+
+      <div class="sa-page" id="sa-archivos">
+        <div class="card">
+          <h2 class="section">Materiales de Ventas</h2>
+          <p class="muted" style="margin-bottom:12px;">Lista ilustrativa — la subida real de archivos todavía no está conectada a almacenamiento.</p>
+          <div class="files-grid" id="files-grid"></div>
+        </div>
+      </div>
+
+      <div class="sa-page" id="sa-playground">
+        <div class="row" style="align-items:flex-start;">
+          <div class="card" style="width:260px; flex-shrink:0;">
+            <button class="btn active" style="width:100%; justify-content:center; margin-bottom:10px;" id="playground-new-chat"><i data-lucide="plus"></i> Nuevo Chat</button>
+            <div class="mf-label" style="font-size:11px; color:var(--muted); margin-bottom:4px;">Persona del cliente simulado</div>
+            <select id="playground-persona" class="btn" style="width:100%; cursor:pointer; margin-bottom:10px;">
+              <option value="familia_joven">Familia joven</option>
+              <option value="inversionista">Inversionista</option>
+              <option value="empty_nester">Empty nester</option>
+              <option value="esceptico">Escéptico</option>
+            </select>
+            <button class="btn" style="width:100%; justify-content:center; margin-bottom:8px;" id="playground-autoplay"><i data-lucide="play"></i> Iniciar conversación automática</button>
+            <div class="muted" style="font-size:11px; text-align:center;" id="playground-status">2 IAs: Mariana responde y otra IA simula al cliente.</div>
+          </div>
+          <div class="card" style="flex:1; min-width:280px;">
+            <div class="chat-messages" id="playground-messages" style="height:340px; margin-bottom:10px;"></div>
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="playground-input" placeholder="Escribe como Mariana (toma de control manual)..." style="flex:1; padding:10px 14px; border-radius:10px; border:1px solid var(--border); font-size:13px;" />
+              <button class="btn active" id="playground-send">Enviar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-integrations">
+      <h1 style="margin-bottom:2px;">Centro de Integraciones</h1>
+      <p class="muted" style="margin-bottom:16px;">Gestiona todas tus integraciones en un solo lugar.</p>
+      <h2 class="section">Canales</h2>
+      <div class="integ-grid" style="margin-bottom:24px;">
+        <div class="integ-card"><div class="integ-icon" style="background:#dcfce7; color:#15803d;"><i data-lucide="message-circle"></i></div><div><div style="font-weight:700;">WhatsApp <span class="pill" style="background:#dcfce7; color:#15803d;">Conectado</span></div><div class="muted" style="font-size:12px;">Tu asistente de ventas está activo y contactando leads por WhatsApp</div></div></div>
+        <div class="integ-card"><div class="integ-icon" style="background:#f1f5f9; color:#475569;"><i data-lucide="message-square"></i></div><div><div style="font-weight:700;">SMS <span class="pill" style="background:#f1f5f9; color:#475569;">No conectado</span></div><div class="muted" style="font-size:12px;">Habilita el canal SMS para ampliar tu alcance</div></div></div>
+        <div class="integ-card"><div class="integ-icon" style="background:#dbeafe; color:#1d4ed8;"><i data-lucide="facebook"></i></div><div><div style="font-weight:700;">Messenger <span class="pill" style="background:#f1f5f9; color:#475569;">No conectado</span></div><div class="muted" style="font-size:12px;">Habilita Messenger para contactar leads en Facebook</div></div></div>
+      </div>
+      <h2 class="section">Base de datos</h2>
+      <div class="integ-card" style="max-width:560px;">
+        <div class="integ-icon" style="background:#ede9fe; color:var(--purple);"><i data-lucide="database"></i></div>
+        <div style="flex:1;">
+          <div style="font-weight:700;">VentaDirecta CRM (Airtable)</div>
+          <div class="muted" style="font-size:12px;" id="airtable-status">Sin probar</div>
+        </div>
+        <button class="btn active" id="test-airtable">Probar conexión</button>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<style>
+  :root{
+    --magenta:#d6249f;
+    --magenta-light:#fbe6f5;
+    --purple:#7c3aed;
+    --bg:#f7f6fb;
+    --card:#ffffff;
+    --border:#e7e3f3;
+    --text:#1f1b3a;
+    --muted:#7c7793;
+    --green:#22c55e;
+    --blue:#3b82f6;
+    --amber:#f59e0b;
+    --red:#ef4444;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#141021; --card:#1c1830; --border:#2c2745; --text:#f1eefb; --muted:#9993b8; --magenta-light:#3a1030;
+    }
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg); color:var(--text); display:flex; min-height:100vh;
+  }
+  a{color:inherit;}
+  i[data-lucide]{width:18px; height:18px; display:inline-block;}
+  /* SIDEBAR */
+  .sidebar{
+    width:68px; background:var(--card); border-right:1px solid var(--border);
+    display:flex; flex-direction:column; align-items:center; padding:16px 0; gap:4px;
+    position:sticky; top:0; height:100vh;
+  }
+  .sidebar .logo{
+    width:36px; height:36px; border-radius:10px; background:var(--magenta-light);
+    display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--magenta);
+    margin-bottom:20px; font-size:14px;
+  }
+  .nav-item{
+    width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; color:var(--muted); position:relative;
+  }
+  .nav-item:hover{background:var(--bg);}
+  .nav-item.active{background:var(--magenta-light); color:var(--magenta);}
+  .nav-item .tooltip{
+    position:absolute; left:56px; background:var(--text); color:var(--card); font-size:12px;
+    padding:4px 8px; border-radius:6px; white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .15s; z-index:10;
+  }
+  .nav-item:hover .tooltip{opacity:1;}
+
+  /* MAIN */
+  main{flex:1; display:flex; flex-direction:column; min-width:0;}
+  header{
+    height:56px; border-bottom:1px solid var(--border); display:flex; align-items:center;
+    justify-content:flex-end; padding:0 24px; background:var(--card); gap:12px;
+  }
+  .avatar{width:32px; height:32px; border-radius:50%; background:var(--magenta); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;}
+  .content{padding:24px; flex:1; overflow-y:auto;}
+  .page{display:none;}
+  .page.active{display:block;}
+
+  /* shared */
+  .card{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:20px;}
+  .row{display:flex; gap:16px; flex-wrap:wrap;}
+  h1{font-size:26px; font-weight:800; letter-spacing:-0.5px;}
+  h2.section{font-size:16px; font-weight:700; margin-bottom:12px;}
+  .muted{color:var(--muted); font-size:13px;}
+  .btn{
+    padding:8px 16px; border-radius:8px; border:1px solid var(--border); background:var(--card);
+    font-size:13px; font-weight:600; cursor:pointer; color:var(--text); display:inline-flex; align-items:center; gap:6px;
+  }
+  .btn.active{background:var(--text); color:var(--bg); border-color:var(--text);}
+  .pill{display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; font-size:11px; font-weight:600;}
+
+  /* HOME */
+  .top-bar{display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;}
+  .stat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin-bottom:20px;}
+  .stat-card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px;}
+  .stat-icon{width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; margin-bottom:10px;}
+  .stat-icon i{width:18px; height:18px;}
+  .stat-card .label{font-size:12px; color:var(--muted); margin-bottom:8px;}
+  .stat-card .value{font-size:24px; font-weight:800;}
+  .stat-card .delta{font-size:11px; color:var(--green); font-weight:600;}
+  .stack-bar{display:flex; height:36px; border-radius:8px; overflow:hidden; margin-bottom:14px;}
+  .stack-seg{display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:13px;}
+  .secondary-row{display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-radius:10px; margin-bottom:10px; font-size:13px; font-weight:600;}
+  .discard-bar-row{margin-bottom:16px;}
+  .discard-bar-label{display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;}
+  .discard-bar-track{height:8px; border-radius:6px; background:var(--bg); overflow:hidden;}
+  .discard-bar-fill{height:100%; border-radius:6px; background:linear-gradient(90deg, var(--magenta), var(--purple));}
+  .grid3{display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:16px;}
+  .funnel-row{display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:13px;}
+  .funnel-label{width:100px; flex-shrink:0;}
+  .funnel-bar-track{flex:1; height:10px; background:var(--bg); border-radius:6px; overflow:hidden;}
+  .funnel-bar-fill{height:100%; border-radius:6px; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; box-sizing:border-box; transition:width .2s;}
+  .funnel-bar-value{color:#fff; font-weight:700; font-size:11.5px; white-space:nowrap;}
+  .funnel-count-outside{font-size:12px; font-weight:700; margin-left:6px; white-space:nowrap;}
+  .funnel-val{width:56px; text-align:right; font-weight:600; flex-shrink:0;}
+  .donut-wrap{display:flex; flex-direction:column; align-items:center; gap:10px;}
+  .donut{width:140px; height:140px; border-radius:50%;}
+  .legend-item{display:flex; align-items:center; gap:6px; font-size:12px;}
+  .dot{width:8px; height:8px; border-radius:50%; display:inline-block;}
+  .discard-row{display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); font-size:13px;}
+
+  /* CHATS */
+  .chats-topbar{display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;}
+  .chats-layout{display:flex; gap:0; height:70vh; border:1px solid var(--border); border-radius:14px; overflow:hidden;}
+  .chat-list-wrap{width:300px; border-right:1px solid var(--border); display:flex; flex-direction:column; background:var(--card); flex-shrink:0;}
+  .chat-search-wrap{padding:12px; border-bottom:1px solid var(--border); position:relative; flex-shrink:0;}
+  .chat-search-wrap input{width:100%; padding:8px 12px 8px 32px; border-radius:8px; border:1px solid var(--border); font-size:12.5px; background:var(--bg); color:var(--text);}
+  .chat-search-icon{position:absolute; left:22px; top:50%; transform:translateY(-50%); width:14px; height:14px; color:var(--muted);}
+  .chat-list{overflow-y:auto; flex:1;}
+  .chat-item{padding:12px 16px; border-bottom:1px solid var(--border); cursor:pointer; display:flex; gap:10px;}
+  .chat-item:hover, .chat-item.active{background:var(--magenta-light);}
+  .chat-item .avatar-sm{width:36px; height:36px; border-radius:50%; background:var(--purple); color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0;}
+  .chat-item .meta{min-width:0; flex:1;}
+  .chat-item .name{font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .chat-item .preview{font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .chat-time{font-size:10.5px; color:var(--muted); white-space:nowrap; flex-shrink:0;}
+  .chat-tag{display:inline-flex; align-items:center; gap:3px; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600; color:#1f1b3a; white-space:nowrap;}
+  .chat-crm-mini{font-size:9.5px; color:var(--muted); display:inline-flex; align-items:center; gap:2px; white-space:nowrap;}
+  .chat-crm-mini i{width:10px; height:10px;}
+  .chat-crm-mini.ok{color:#15803d;}
+  .chat-status-pill-mini{font-size:9.5px; font-weight:600; padding:2px 7px; border-radius:6px; white-space:nowrap; flex-shrink:0;}
+  .chat-panel{flex:1; display:flex; flex-direction:column; background:var(--bg); min-width:0;}
+  .chat-header{padding:14px 20px; background:var(--card); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;}
+  .chat-status-pill{font-size:11px; font-weight:600; padding:3px 10px; border-radius:8px; white-space:nowrap;}
+  .chat-crm-pill{font-size:11px; font-weight:600; padding:3px 10px; border-radius:8px; background:#dcfce7; color:#15803d; display:inline-flex; align-items:center; gap:4px; white-space:nowrap;}
+  .chat-crm-pill.pending{background:#f1f5f9; color:var(--muted);}
+  .chat-messages{flex:1; padding:20px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;}
+  .bubble{max-width:65%; padding:10px 14px; border-radius:12px; font-size:13px;}
+  .bubble.lead{align-self:flex-start; background:var(--card); border:1px solid var(--border);}
+  .bubble.bot{align-self:flex-end; background:var(--purple); color:#fff;}
+  .ai-lock-banner{background:#fef3c7; color:#92400e; font-size:12px; padding:10px 20px; display:flex; align-items:center; gap:6px; border-top:1px solid var(--border);}
+  .ai-lock-banner.hidden{display:none;}
+  .chat-input{padding:14px; background:var(--card); border-top:1px solid var(--border); display:flex; gap:10px; align-items:center;}
+  .chat-input input{flex:1; padding:10px 14px; border-radius:10px; border:1px solid var(--border); font-size:13px; background:var(--card); color:var(--text);}
+  .chat-input input:disabled{background:var(--bg); color:var(--muted); cursor:not-allowed;}
+  .chat-attach-icon{width:18px; height:18px; color:var(--muted); cursor:pointer; flex-shrink:0;}
+  .chat-send-btn{width:38px; height:38px; border-radius:10px; background:var(--purple); color:#fff; border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;}
+  .chat-send-btn i{width:16px; height:16px;}
+  .chat-send-btn:disabled{background:var(--border); color:var(--muted); cursor:not-allowed;}
+  .switch{width:36px; height:20px; border-radius:20px; background:var(--border); position:relative; cursor:pointer; flex-shrink:0;}
+  .switch.on{background:var(--green);}
+  .switch .knob{width:16px; height:16px; border-radius:50%; background:#fff; position:absolute; top:2px; left:2px; transition:left .15s;}
+  .switch.on .knob{left:18px;}
+
+  /* KANBAN */
+  .kanban-board{display:grid; grid-auto-flow:column; grid-auto-columns:240px; gap:12px;}
+  .kanban-col{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:10px; min-height:400px; width:240px;}
+  .kanban-col-header{font-size:12px; font-weight:700; padding:6px 10px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; color:#1f1b3a;}
+  .kanban-col-header .badge-count{background:rgba(0,0,0,0.12); border-radius:999px; padding:1px 7px; font-size:11px;}
+  .kanban-card{background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px; margin-bottom:8px; font-size:12px; cursor:grab;}
+  .kanban-card .name{font-weight:600; margin-bottom:2px;}
+  .kc-top{display:flex; justify-content:space-between; align-items:flex-start; gap:6px; margin-bottom:6px;}
+  .kc-avatar{width:26px; height:26px; border-radius:50%; background:var(--purple); color:#fff; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; flex-shrink:0;}
+  .kc-sync{font-size:9px; display:flex; align-items:center; gap:3px; white-space:nowrap;}
+  .kc-sync.ok{color:#15803d;}
+  .kc-sync.pending{color:var(--muted);}
+  .kc-tag{display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:600; margin-bottom:6px;}
+  .kc-foot{display:flex; justify-content:space-between; align-items:center; font-size:10.5px; color:var(--muted); margin-top:6px;}
+  .kc-discard{font-size:10px; color:#b91c1c; margin-top:4px; display:flex; align-items:center; gap:3px;}
+
+  /* MARKETING TABS */
+  .mkt-tab{padding-bottom:10px; font-size:14px; font-weight:600; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent;}
+  .mkt-tab.active{color:var(--magenta); border-bottom-color:var(--magenta);}
+  .mkt-page{display:none;}
+  .mkt-page.active{display:block;}
+  .mapping-card{border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:14px;}
+  .mapping-fields{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin-top:10px;}
+  .mapping-fields .mf-label{font-size:11px; color:var(--muted); margin-bottom:2px;}
+  .mapping-fields input{width:100%; padding:6px 8px; border-radius:6px; border:1px solid var(--border); font-size:12px; background:var(--card); color:var(--text);}
+
+  /* TEAM PAGE */
+  .team-page{display:none;}
+  .team-page.active{display:block;}
+  .member-row{display:flex; align-items:center; gap:12px; padding:14px 18px; border-bottom:1px solid var(--border); flex-wrap:wrap;}
+  .member-row:last-child{border-bottom:none;}
+  .rotation-row{display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border);}
+  .rotation-row:last-child{border-bottom:none;}
+
+  /* SALES ASSISTANT */
+  .sa-page{display:none;}
+  .sa-page.active{display:block;}
+  .kb-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:14px;}
+  .kb-card{border-top:3px solid var(--magenta); border-radius:0 0 10px 10px; background:var(--card); border-left:1px solid var(--border); border-right:1px solid var(--border); border-bottom:1px solid var(--border); padding:14px;}
+  .kb-card textarea{width:100%; min-height:70px; border:1px solid var(--border); border-radius:8px; padding:8px; font-size:12.5px; font-family:inherit; background:var(--bg); color:var(--text); resize:vertical;}
+  .files-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px;}
+  .file-card{border:1px solid var(--border); border-radius:10px; padding:12px; font-size:12px;}
+
+  /* CALENDAR */
+  .cal-grid{display:grid; grid-template-columns:60px repeat(5,1fr); border:1px solid var(--border); border-radius:14px; overflow:hidden;}
+  .cal-cell{border-bottom:1px solid var(--border); border-right:1px solid var(--border); padding:6px; font-size:11px; min-height:52px; position:relative;}
+  .cal-head{background:var(--card); font-weight:700; text-align:center; padding:10px; font-size:12px;}
+  .cal-time{background:var(--card); color:var(--muted); text-align:center; font-size:11px; padding:6px;}
+  .appt{background:var(--magenta-light); color:var(--magenta); border-radius:6px; padding:4px 6px; font-size:10px; font-weight:600;}
+
+  /* TEAM */
+  .team-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  .team-card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; display:flex; gap:12px; align-items:center;}
+
+  /* SALES ASSISTANT */
+  .sa-tabs{display:flex; gap:8px; margin-bottom:16px;}
+
+  /* MARKETING */
+  .matrix{position:relative; height:260px; border:1px solid var(--border); border-radius:12px; background:var(--bg); margin-bottom:8px;}
+  .matrix-dot{position:absolute; width:14px; height:14px; border-radius:50%; transform:translate(-50%,50%);}
+  .axis-label{font-size:11px; color:var(--muted);}
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  th{text-align:left; font-size:11px; color:var(--muted); text-transform:uppercase; padding:8px; border-bottom:1px solid var(--border);}
+  td{padding:10px 8px; border-bottom:1px solid var(--border);}
+  .badge{padding:2px 8px; border-radius:6px; font-size:12px; font-weight:600;}
+  .badge.high{background:#dcfce7; color:#15803d;}
+  .badge.mid{background:#fef9c3; color:#a16207;}
+  .badge.low{background:#fee2e2; color:#b91c1c;}
+
+  /* INTEGRATIONS */
+  .integ-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  .integ-card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; display:flex; align-items:center; gap:12px;}
+  .integ-icon{width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+
+  @media (max-width:1000px){
+    .stat-grid{grid-template-columns:repeat(2,1fr);}
+    .grid3{grid-template-columns:1fr;}
+    .kanban-board{grid-template-columns:repeat(2,1fr);}
+    .team-grid, .integ-grid{grid-template-columns:1fr;}
+  }
+  @media (max-width:700px){
+    body{flex-direction:column;}
+    .sidebar{width:100%; height:auto; flex-direction:row; position:relative; overflow-x:auto; justify-content:flex-start;}
+    .sidebar .logo{margin-bottom:0; margin-right:8px;}
+    .stat-grid{grid-template-columns:1fr 1fr;}
+    .chats-layout{flex-direction:column; height:auto;}
+    .chat-list-wrap{width:100%;}
+    .chat-list{max-height:200px;}
+    .kanban-board{grid-template-columns:1fr;}
+  }
+</style>
+
+<script>
+  document.querySelectorAll('.nav-item').forEach(function(item){
+    item.addEventListener('click', function(){
+      document.querySelectorAll('.nav-item').forEach(function(i){ i.classList.remove('active'); });
+      item.classList.add('active');
+      document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+      document.getElementById('page-' + item.dataset.page).classList.add('active');
+    });
+  });
+
+  var AIRTABLE_TOKEN = 'patBNsYp2PlMIR25V.dc0d6cdd81bba409b0dca26b04878e232eed78d027e3ce2a358b72c4e301112c';
+  var AIRTABLE_BASE = 'appfePUgFn4f0lhGb';
+  var LEADS_TABLE = 'tblXIiUMYXs8pvRgW';
+  var MESSAGES_TABLE = 'tblFPDDoTaDOEXpyA';
+  var CAMPAIGNS_TABLE = 'tblmZfp3OGX8lkfHL';
+  var TEAM_TABLE = 'tble83tDpBdee1HFY';
+  var KB_TABLE = 'tblljbrvURYEg3qDF';
+  var AIRTABLE_API = 'https://api.airtable.com/v0/' + AIRTABLE_BASE;
+  var STAGE_TAGS = {nuevo:'Nuevo Lead', no_contesto:'No Contesto', contactado:'Contactado', interesado:'Interesado', cita:'Cita', visita:'Visita', separacion:'Separación', venta:'Venta', desperfilado:'Desperfilado'};
+  var kanbanFilter = 'nuevos';
+  var contactsPage = 0, contactsPageSize = 10, contactsSearch = '', contactsStageFilter = '', contactsSort = {key:'created', dir:'desc'};
+  var campaignMappings = [], teamMembers = [], knowledgeBase = [];
+
+  // ---------------------------------------------------------------------
+  // PLAYGROUND: 2 IAs (Mariana vs. cliente simulado). El backend real vive
+  // en un servicio aparte (proyecto whatsapp-sales-bot desplegado en Render)
+  // para que la API key de Anthropic nunca esté en esta página pública.
+  // Actualiza estas dos líneas después de desplegar el backend:
+  var SIMULATE_API_URL = ''; // ej: 'https://stanza-sales-bot.onrender.com/simulate/next'
+  var SIMULATE_SECRET = ''; // debe coincidir con SIMULATE_SECRET en Render
+  var playgroundConversation = [];
+  var playgroundRunning = false;
+  var playgroundPersona = 'familia_joven';
+
+  var leads = [];
+  var conversations = {};
+  var activeId = null;
+  var aiOn = true;
+
+  function airtableFetch(path, opts){
+    opts = opts || {};
+    opts.headers = Object.assign({'Authorization':'Bearer '+AIRTABLE_TOKEN, 'Content-Type':'application/json'}, opts.headers||{});
+    return fetch(AIRTABLE_API + path, opts).then(function(res){
+      if(!res.ok){ throw new Error('Airtable error ' + res.status); }
+      return res.json();
+    });
+  }
+
+  function loadLeads(){
+    return airtableFetch('/' + LEADS_TABLE + '?pageSize=100').then(function(data){
+      leads = data.records.map(function(r){
+        return {
+          id: r.id,
+          name: r.fields.Name || '(sin nombre)',
+          phone: r.fields.Phone || '',
+          stage: r.fields.Stage || 'nuevo',
+          tag: r.fields.Tag || (STAGE_TAGS[r.fields.Stage] || 'Nuevo Lead'),
+          email: r.fields.Email || '',
+          source: r.fields.Source || '',
+          salesRep: r.fields.SalesRep || 'Ninguno',
+          propiedad: r.fields.Propiedad || '',
+          crmSync: r.fields.CRMSync || 'Pendiente',
+          created: r.createdTime,
+        };
+      });
+    });
+  }
+
+  function loadMessages(){
+    return airtableFetch('/' + MESSAGES_TABLE + '?pageSize=100').then(function(data){
+      conversations = {};
+      data.records.forEach(function(r){
+        var leadIds = r.fields.Lead || [];
+        leadIds.forEach(function(lid){
+          conversations[lid] = conversations[lid] || [];
+          conversations[lid].push({from: r.fields.From || 'lead', text: r.fields.Text || '', _created: r.createdTime});
+        });
+      });
+      Object.keys(conversations).forEach(function(lid){
+        conversations[lid].sort(function(a,b){ return new Date(a._created) - new Date(b._created); });
+      });
+    });
+  }
+
+  function createMessage(leadId, from, text){
+    var body = { fields: { Text: text, From: from, Lead: [leadId] } };
+    return airtableFetch('/' + MESSAGES_TABLE, { method:'POST', body: JSON.stringify(body) });
+  }
+
+  function updateLeadStage(leadId, stage){
+    var body = { fields: { Stage: stage, Tag: STAGE_TAGS[stage] || stage } };
+    return airtableFetch('/' + LEADS_TABLE + '/' + leadId, { method:'PATCH', body: JSON.stringify(body) });
+  }
+
+  function timeAgo(iso){
+    if(!iso) return '';
+    var diff = Date.now() - new Date(iso).getTime();
+    var mins = Math.floor(diff/60000);
+    if(mins < 1) return 'ahora';
+    if(mins < 60) return mins + ' min';
+    var hours = Math.floor(mins/60);
+    if(hours < 24) return hours + ' hora' + (hours>1?'s':'');
+    var days = Math.floor(hours/24);
+    return days + ' día' + (days>1?'s':'');
+  }
+
+  function fmtDate(iso){
+    if(!iso) return '';
+    var d = new Date(iso);
+    return d.toLocaleDateString('es-MX', {day:'2-digit', month:'short', year:'numeric'});
+  }
+
+  function downloadCSV(filename, rows, headers){
+    var csv = headers.join(',') + '\n' + rows.map(function(r){
+      return headers.map(function(h){
+        var v = (r[h] !== undefined && r[h] !== null) ? String(r[h]) : '';
+        v = v.replace(/"/g,'""');
+        if(v.indexOf(',')>-1 || v.indexOf('"')>-1 || v.indexOf('\n')>-1) v = '"'+v+'"';
+        return v;
+      }).join(',');
+    }).join('\n');
+    var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  }
+
+  // CONTACTS
+  function getFilteredContacts(){
+    var list = leads.slice();
+    if(contactsStageFilter) list = list.filter(function(l){return l.stage===contactsStageFilter;});
+    if(contactsSearch){
+      var q = contactsSearch.toLowerCase();
+      list = list.filter(function(l){
+        return (l.name||'').toLowerCase().indexOf(q)>-1 || (l.email||'').toLowerCase().indexOf(q)>-1 || (l.phone||'').toLowerCase().indexOf(q)>-1;
+      });
+    }
+    list.sort(function(a,b){
+      var av, bv;
+      if(contactsSort.key==='name'){ av=a.name||''; bv=b.name||''; }
+      else if(contactsSort.key==='stage'){ av=a.stage||''; bv=b.stage||''; }
+      else { av=new Date(a.created).getTime(); bv=new Date(b.created).getTime(); }
+      if(av<bv) return contactsSort.dir==='asc'?-1:1;
+      if(av>bv) return contactsSort.dir==='asc'?1:-1;
+      return 0;
+    });
+    return list;
+  }
+
+  function lastContactLabel(leadId){
+    var conv = conversations[leadId];
+    if(!conv || !conv.length) return 'Sin mensajes';
+    return conv.length + ' mensaje' + (conv.length>1?'s':'');
+  }
+
+  function renderContacts(){
+    var all = getFilteredContacts();
+    var totalPages = Math.max(1, Math.ceil(all.length / contactsPageSize));
+    if(contactsPage >= totalPages) contactsPage = totalPages - 1;
+    if(contactsPage < 0) contactsPage = 0;
+    var pageItems = all.slice(contactsPage*contactsPageSize, contactsPage*contactsPageSize + contactsPageSize);
+    var tbody = document.getElementById('contacts-tbody');
+    if(!tbody) return;
+    tbody.innerHTML = '';
+    pageItems.forEach(function(l){
+      var tr = document.createElement('tr');
+      var syncOk = l.crmSync === 'Sincronizado';
+      tr.innerHTML =
+        '<td><b>'+l.name+'</b></td>'+
+        '<td class="muted">'+(l.email||'No Disponible')+'</td>'+
+        '<td>'+(l.phone||'')+'</td>'+
+        '<td><span class="kc-tag" style="background:var(--bg);">'+l.tag+'</span></td>'+
+        '<td>'+(l.propiedad||'-')+'</td>'+
+        '<td class="'+(syncOk?'':'muted')+'">'+(syncOk?'✓ ':'⟳ ')+l.crmSync+'</td>'+
+        '<td class="muted">'+(l.source||'-')+'</td>'+
+        '<td class="muted">'+l.salesRep+'</td>'+
+        '<td class="muted">'+fmtDate(l.created)+'</td>'+
+        '<td class="muted">'+lastContactLabel(l.id)+'</td>';
+      tbody.appendChild(tr);
+    });
+    var countEl = document.getElementById('contacts-count');
+    if(countEl) countEl.textContent = 'Mostrando ' + (all.length ? (contactsPage*contactsPageSize+1) : 0) + '-' + Math.min(all.length, (contactsPage+1)*contactsPageSize) + ' de ' + all.length;
+    var pageEl = document.getElementById('contacts-page-label');
+    if(pageEl) pageEl.textContent = 'Página ' + (contactsPage+1) + ' de ' + totalPages;
+  }
+
+  // MARKETING
+  function loadMappings(){
+    return airtableFetch('/' + CAMPAIGNS_TABLE + '?pageSize=100').then(function(data){
+      campaignMappings = data.records.map(function(r){
+        return {id:r.id, message:r.fields.Message||'', platform:r.fields.Platform||'', campaign:r.fields.Campaign||'', adset:r.fields.AdSet||'', ad:r.fields.Ad||''};
+      });
+    });
+  }
+
+  function renderMappings(){
+    var list = document.getElementById('mapping-list');
+    if(!list) return;
+    list.innerHTML = '';
+    campaignMappings.forEach(function(m){
+      var div = document.createElement('div');
+      div.className = 'mapping-card';
+      div.innerHTML =
+        '<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">'+
+          '<div style="font-weight:600; color:var(--magenta);">'+m.message+'</div>'+
+          '<div style="display:flex; gap:8px; flex-shrink:0;"><i data-lucide="trash-2" style="width:14px;height:14px; cursor:pointer; color:#ef4444;" data-del="'+m.id+'"></i></div>'+
+        '</div>'+
+        '<div class="mapping-fields">'+
+          '<div><div class="mf-label">Plataforma</div><input data-field="Platform" data-id="'+m.id+'" value="'+m.platform+'"/></div>'+
+          '<div><div class="mf-label">Campaña</div><input data-field="Campaign" data-id="'+m.id+'" value="'+m.campaign+'"/></div>'+
+          '<div><div class="mf-label">Conjunto de anuncios</div><input data-field="AdSet" data-id="'+m.id+'" value="'+m.adset+'"/></div>'+
+          '<div><div class="mf-label">Anuncio</div><input data-field="Ad" data-id="'+m.id+'" value="'+m.ad+'"/></div>'+
+        '</div>';
+      list.appendChild(div);
+    });
+    list.querySelectorAll('[data-del]').forEach(function(icon){
+      icon.addEventListener('click', function(){
+        var id = icon.getAttribute('data-del');
+        campaignMappings = campaignMappings.filter(function(m){return m.id!==id;});
+        renderMappings();
+        airtableFetch('/' + CAMPAIGNS_TABLE + '/' + id, {method:'DELETE'}).catch(function(err){console.error(err);});
+      });
+    });
+    list.querySelectorAll('input[data-field]').forEach(function(inp){
+      inp.addEventListener('change', function(){
+        var id = inp.getAttribute('data-id');
+        var field = inp.getAttribute('data-field');
+        var body = { fields: {} };
+        body.fields[field] = inp.value;
+        airtableFetch('/' + CAMPAIGNS_TABLE + '/' + id, {method:'PATCH', body:JSON.stringify(body)}).catch(function(err){console.error(err);});
+      });
+    });
+    if(window.lucide) window.lucide.createIcons();
+  }
+
+  function renderMarketingBreakdown(){
+    var total = leads.length;
+    var advanced = ['contactado','interesado','cita','visita','separacion','venta'];
+    var qualifiedStages = ['interesado','cita','visita','separacion','venta'];
+    var apptStages = ['cita','visita','separacion','venta'];
+    var contacted = leads.filter(function(l){return advanced.indexOf(l.stage)>-1;}).length;
+    var qualified = leads.filter(function(l){return qualifiedStages.indexOf(l.stage)>-1;}).length;
+    var appts = leads.filter(function(l){return apptStages.indexOf(l.stage)>-1;}).length;
+    var visits = leads.filter(function(l){return ['visita','separacion','venta'].indexOf(l.stage)>-1;}).length;
+    var sep = leads.filter(function(l){return ['separacion','venta'].indexOf(l.stage)>-1;}).length;
+    var sales = leads.filter(function(l){return l.stage==='venta';}).length;
+    var steps = [
+      {label:'Leads', count:total, color:'var(--purple)'},
+      {label:'Contactados', count:contacted, color:'var(--magenta)'},
+      {label:'Calificados', count:qualified, color:'var(--amber)'},
+      {label:'Citas', count:appts, color:'var(--green)'},
+      {label:'Visitas', count:visits, color:'var(--blue)'},
+      {label:'Separaciones', count:sep, color:'#0f766e'},
+      {label:'Ventas', count:sales, color:'#1e3a8a'},
+    ];
+    var el = document.getElementById('mkt-funnel');
+    if(el){
+      el.innerHTML = steps.map(function(s){
+        var pct = total ? Math.round((s.count/total)*1000)/10 : 0;
+        var showInside = pct >= 12;
+        var inner = showInside ? '<span class="funnel-bar-value">'+s.count+'</span>' : '';
+        var outside = !showInside ? '<span class="funnel-count-outside">'+s.count+'</span>' : '';
+        return '<div class="funnel-row"><div class="funnel-label">'+s.label+'</div><div style="display:flex; align-items:center; gap:0; flex:1; min-width:0;"><div class="funnel-bar-track" style="flex:1;"><div class="funnel-bar-fill" style="width:'+pct+'%; background:'+s.color+';">'+inner+'</div></div>'+outside+'</div><div class="funnel-val">'+(total? pct+'%':'–')+'</div></div>';
+      }).join('');
+    }
+
+    var bySource = {};
+    leads.forEach(function(l){
+      var src = l.source || 'sin fuente';
+      bySource[src] = bySource[src] || [];
+      bySource[src].push(l);
+    });
+    function pctBadge(v){ var cls = v>=60?'high':(v>=30?'mid':'low'); return '<span class="badge '+cls+'">'+v.toFixed(1)+'%</span>'; }
+
+    // Clasifica cada fuente en Alto Rendimiento / Oportunidad / Bajo Objetivo / En Revisión
+    // usando la misma regla que los puntos de la Matriz de Rendimiento, para que
+    // las pastillas, la leyenda y los puntos siempre cuenten lo mismo.
+    var catCounts = {alto:0, oportunidad:0, bajo:0, revision:0};
+    Object.keys(bySource).forEach(function(src){
+      var arr = bySource[src];
+      var n = arr.length;
+      var rate = n ? (arr.filter(function(l){return apptStages.indexOf(l.stage)>-1;}).length / n) * 100 : 0;
+      if(n <= 1){ catCounts.revision++; }
+      else if(rate >= 30){ catCounts.alto++; }
+      else if(rate >= 15){ catCounts.oportunidad++; }
+      else { catCounts.bajo++; }
+    });
+    var setPill = function(id, icon, count, label){
+      var elp = document.getElementById(id);
+      if(elp) elp.textContent = icon + ' ' + count + ' ' + label;
+    };
+    setPill('pill-alto', '★', catCounts.alto, 'Alto Rendimiento');
+    setPill('pill-oportunidad', '↗', catCounts.oportunidad, 'Oportunidad');
+    setPill('pill-bajo', '⚠', catCounts.bajo, 'Bajo Objetivo');
+    setPill('pill-revision', '↘', catCounts.revision, 'En Revisión');
+    ['alto','oportunidad','bajo','revision'].forEach(function(k){
+      var legendEl = document.getElementById('legend-'+k);
+      if(legendEl) legendEl.textContent = catCounts[k];
+    });
+
+    var rows = Object.keys(bySource).sort(function(a,b){return bySource[b].length-bySource[a].length;}).map(function(src){
+      var arr = bySource[src];
+      var n = arr.length;
+      var c = arr.filter(function(l){return advanced.indexOf(l.stage)>-1;}).length;
+      var q = arr.filter(function(l){return qualifiedStages.indexOf(l.stage)>-1;}).length;
+      var a2 = arr.filter(function(l){return apptStages.indexOf(l.stage)>-1;}).length;
+      function pct(x){ return n ? (x/n)*100 : 0; }
+      var label = src==='sin fuente' ? '<span class="muted">⚠ sin fuente</span>' : src;
+      return '<tr><td>'+label+'</td><td>'+n+'</td><td>'+pctBadge(pct(c))+'</td><td>'+pctBadge(pct(q))+'</td><td>'+pctBadge(pct(a2))+'</td></tr>';
+    }).join('');
+    var bd = document.getElementById('mkt-breakdown');
+    if(bd) bd.innerHTML = rows;
+
+    var sinFuenteEl = document.getElementById('pill-sin-fuente');
+    if(sinFuenteEl){
+      var sinFuente = bySource['sin fuente'] ? bySource['sin fuente'].length : 0;
+      var pct17 = total ? Math.round((sinFuente/total)*1000)/10 : 0;
+      sinFuenteEl.textContent = '⚠ ' + sinFuente + ' sin fuente (' + pct17 + '%)';
+    }
+    if(window.lucide) window.lucide.createIcons();
+  }
+
+  // TEAM
+  function loadTeam(){
+    return airtableFetch('/' + TEAM_TABLE + '?pageSize=100').then(function(data){
+      teamMembers = data.records.map(function(r){
+        return {id:r.id, name:r.fields.Name||'', email:r.fields.Email||'', phone:r.fields.Phone||'', role:r.fields.Role||'Asesor', verified:!!r.fields.Verified, inRotation: !!r.fields.InRotation, rotationActive: !!r.fields.RotationActive};
+      });
+    });
+  }
+
+  function renderTeamMembers(){
+    var list = document.getElementById('team-members-list');
+    if(!list) return;
+    list.innerHTML = '';
+    teamMembers.forEach(function(m){
+      var row = document.createElement('div');
+      row.className = 'member-row';
+      row.innerHTML =
+        '<div class="avatar" style="background:var(--magenta);">'+initials(m.name)+'</div>'+
+        '<div style="flex:1; min-width:180px;"><div style="font-weight:700;">'+m.name+' '+(m.verified?'<span class="pill" style="background:#dcfce7; color:#15803d;">Verificado</span>':'')+'</div><div class="muted" style="font-size:12px;">'+m.email+' · '+m.phone+'</div></div>'+
+        '<select class="btn" data-role-id="'+m.id+'" style="cursor:pointer;"><option value="Admin"'+(m.role==='Admin'?' selected':'')+'>Admin</option><option value="Asesor"'+(m.role==='Asesor'?' selected':'')+'>Asesor</option></select>';
+      list.appendChild(row);
+    });
+    list.querySelectorAll('[data-role-id]').forEach(function(sel){
+      sel.addEventListener('change', function(){
+        var id = sel.getAttribute('data-role-id');
+        var role = sel.value;
+        var m = teamMembers.find(function(x){return x.id===id;});
+        if(m) m.role = role;
+        airtableFetch('/' + TEAM_TABLE + '/' + id, {method:'PATCH', body:JSON.stringify({fields:{Role:role}})}).catch(function(err){console.error(err);});
+      });
+    });
+  }
+
+  function renderRotation(){
+    var summaryEl = document.getElementById('rotation-summary');
+    var list = document.getElementById('rotation-list');
+    if(!list) return;
+    var inRot = teamMembers.filter(function(m){return m.inRotation;});
+    var activeCount = inRot.filter(function(m){return m.rotationActive;}).length;
+    if(summaryEl) summaryEl.textContent = activeCount + ' activo · ' + inRot.length + ' total';
+    list.innerHTML = '';
+    inRot.forEach(function(m, idx){
+      var row = document.createElement('div');
+      row.className = 'rotation-row';
+      row.innerHTML =
+        '<span class="muted">#'+(idx+1)+'</span>'+
+        '<div style="flex:1; min-width:180px;"><div style="font-weight:700;">'+m.name+'</div><div class="muted" style="font-size:12px;">'+m.phone+' · '+m.email+'</div></div>'+
+        '<span class="muted" style="font-size:12px;">'+(m.rotationActive?'Activo':'Inactivo')+'</span>'+
+        '<div class="switch '+(m.rotationActive?'on':'')+'" data-rot-id="'+m.id+'" style="cursor:pointer;"><div class="knob"></div></div>';
+      list.appendChild(row);
+    });
+    list.querySelectorAll('[data-rot-id]').forEach(function(sw){
+      sw.addEventListener('click', function(){
+        var id = sw.getAttribute('data-rot-id');
+        var m = teamMembers.find(function(x){return x.id===id;});
+        m.rotationActive = !m.rotationActive;
+        renderRotation();
+        airtableFetch('/' + TEAM_TABLE + '/' + id, {method:'PATCH', body:JSON.stringify({fields:{RotationActive:m.rotationActive}})}).catch(function(err){console.error(err);});
+      });
+    });
+  }
+
+  // SALES ASSISTANT
+  function loadKB(){
+    return airtableFetch('/' + KB_TABLE + '?pageSize=100').then(function(data){
+      knowledgeBase = data.records.map(function(r){
+        return {id:r.id, section:r.fields.Section||'', content:r.fields.Content||'', order:r.fields.Order||0};
+      }).sort(function(a,b){ return a.order - b.order; });
+    });
+  }
+
+  function renderKB(){
+    var grid = document.getElementById('kb-grid');
+    if(!grid) return;
+    grid.innerHTML = '';
+    knowledgeBase.forEach(function(k){
+      var card = document.createElement('div');
+      card.className = 'kb-card';
+      card.innerHTML =
+        '<div style="font-weight:700; font-size:12.5px; margin-bottom:8px;">'+k.section+' <i data-lucide="check-circle" style="width:12px;height:12px; color:#15803d; vertical-align:-1px;"></i></div>'+
+        '<textarea data-kb-id="'+k.id+'"></textarea>'+
+        '<button class="btn" style="margin-top:8px; font-size:11px; padding:5px 10px;" data-kb-save="'+k.id+'">Guardar</button>';
+      grid.appendChild(card);
+      card.querySelector('textarea').value = k.content;
+    });
+    grid.querySelectorAll('[data-kb-save]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var id = btn.getAttribute('data-kb-save');
+        var ta = grid.querySelector('textarea[data-kb-id="'+id+'"]');
+        airtableFetch('/' + KB_TABLE + '/' + id, {method:'PATCH', body:JSON.stringify({fields:{Content: ta.value}})}).then(function(){
+          btn.textContent = 'Guardado ✓';
+          setTimeout(function(){ btn.textContent='Guardar'; }, 1500);
+        }).catch(function(err){ console.error(err); alert('No se pudo guardar'); });
+      });
+    });
+    if(window.lucide) window.lucide.createIcons();
+  }
+
+  function renderFiles(){
+    var files = [
+      {name:'Brochure_Stanza.pdf', size:'735.25 KB', icon:'file-text', date:'19/5/2026'},
+      {name:'WhatsApp_Image_1.jpg', size:'142.06 KB', icon:'image', date:'15/5/2026'},
+      {name:'WhatsApp_Image_2.jpg', size:'137.37 KB', icon:'image', date:'15/5/2026'},
+      {name:'WhatsApp_Image_3.jpg', size:'242.52 KB', icon:'image', date:'15/5/2026'},
+      {name:'WhatsApp_Image_4.jpg', size:'228.11 KB', icon:'image', date:'15/5/2026'},
+      {name:'WhatsApp_Image_5.jpg', size:'87.98 KB', icon:'image', date:'15/5/2026'},
+    ];
+    var grid = document.getElementById('files-grid');
+    if(!grid) return;
+    grid.innerHTML = files.map(function(f){
+      return '<div class="file-card"><i data-lucide="'+f.icon+'" style="width:20px;height:20px; color:var(--magenta);"></i><div style="font-weight:600; margin-top:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">'+f.name+'</div><div class="muted" style="font-size:11px;">'+f.size+' · '+f.date+'</div></div>';
+    }).join('');
+    if(window.lucide) window.lucide.createIcons();
+  }
+
+  function renderPlayground(){
+    var box = document.getElementById('playground-messages');
+    if(!box) return;
+    box.innerHTML = '';
+    playgroundConversation.forEach(function(m){
+      var b = document.createElement('div');
+      b.className = 'bubble ' + (m.from === 'customer' ? 'lead' : 'bot');
+      b.innerHTML = '<b style="font-size:10px; opacity:0.7; display:block; margin-bottom:2px;">'+(m.from==='customer'?'Cliente simulado':'Mariana')+'</b>'+m.text;
+      box.appendChild(b);
+    });
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function setPlaygroundStatus(text){
+    var el = document.getElementById('playground-status');
+    if(el) el.textContent = text;
+  }
+
+  function callSimulate(nextSpeaker){
+    if(!SIMULATE_API_URL){
+      return Promise.reject(new Error('Falta configurar el backend del Playground (ver README del proyecto whatsapp-sales-bot).'));
+    }
+    return fetch(SIMULATE_API_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json', 'X-Simulate-Key': SIMULATE_SECRET},
+      body: JSON.stringify({conversation: playgroundConversation, nextSpeaker: nextSpeaker, persona: playgroundPersona})
+    }).then(function(res){
+      if(!res.ok) return res.json().catch(function(){ return {}; }).then(function(body){ throw new Error(body.error || ('Error del servidor ('+res.status+')')); });
+      return res.json();
+    }).then(function(data){ return data.text; });
+  }
+
+  function playgroundAutoplay(){
+    playgroundRunning = true;
+    var btn = document.getElementById('playground-autoplay');
+    if(btn) btn.innerHTML = '<i data-lucide="square"></i> Detener';
+    if(window.lucide) window.lucide.createIcons();
+    setPlaygroundStatus('Simulando conversación...');
+    var turn = playgroundConversation.length === 0 ? 'customer' : (playgroundConversation[playgroundConversation.length-1].from === 'mariana' ? 'customer' : 'mariana');
+    var count = 0;
+    function step(){
+      if(!playgroundRunning || count >= 12){
+        playgroundRunning = false;
+        if(btn) btn.innerHTML = '<i data-lucide="play"></i> Iniciar conversación automática';
+        if(window.lucide) window.lucide.createIcons();
+        setPlaygroundStatus(count >= 12 ? 'Límite de 12 turnos alcanzado. Puedes continuar manualmente o iniciar un chat nuevo.' : 'Simulación pausada.');
+        return;
+      }
+      callSimulate(turn).then(function(text){
+        playgroundConversation.push({from:turn, text:text});
+        renderPlayground();
+        turn = turn === 'mariana' ? 'customer' : 'mariana';
+        count++;
+        setTimeout(step, 900);
+      }).catch(function(err){
+        playgroundRunning = false;
+        if(btn) btn.innerHTML = '<i data-lucide="play"></i> Iniciar conversación automática';
+        if(window.lucide) window.lucide.createIcons();
+        setPlaygroundStatus('Error: ' + err.message);
+      });
+    }
+    step();
+  }
+
+  function sendPlaygroundMsg(){
+    var input = document.getElementById('playground-input');
+    var text = input.value.trim();
+    if(!text) return;
+    playgroundConversation.push({from:'mariana', text:text});
+    input.value = '';
+    renderPlayground();
+    setPlaygroundStatus('Esperando respuesta del cliente simulado...');
+    callSimulate('customer').then(function(reply){
+      playgroundConversation.push({from:'customer', text:reply});
+      renderPlayground();
+      setPlaygroundStatus('Listo.');
+    }).catch(function(err){
+      setPlaygroundStatus('Error: ' + err.message);
+    });
+  }
+
+  function renderHomeStats(){
+    var total = leads.length;
+    var contacted = leads.filter(function(l){ return l.stage === 'contactado' || l.stage === 'interesado' || l.stage === 'cita'; }).length;
+    var qualified = leads.filter(function(l){ return l.stage === 'interesado' || l.stage === 'cita'; }).length;
+    var appts = leads.filter(function(l){ return l.stage === 'cita'; }).length;
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-contact-rate').textContent = total ? (Math.round((contacted/total)*1000)/10) + '%' : '0%';
+    document.getElementById('stat-qualified-rate').textContent = total ? (Math.round((qualified/total)*1000)/10) + '%' : '0%';
+    document.getElementById('stat-appt-rate').textContent = total ? (Math.round((appts/total)*1000)/10) + '%' : '0%';
+    document.getElementById('stat-contact-count').textContent = contacted + ' leads';
+    document.getElementById('stat-qualified-count').textContent = qualified + ' leads';
+    document.getElementById('stat-appt-count').textContent = appts + ' leads';
+
+    ['nuevo','contactado','interesado','cita','desperfilado'].forEach(function(stage){
+      var count = leads.filter(function(l){ return l.stage === stage; }).length;
+      var pct = total ? Math.round((count/total)*1000)/10 : 0;
+      var fill = document.getElementById('funnel-fill-'+stage);
+      var val = document.getElementById('funnel-val-'+stage);
+      if(fill) fill.style.width = pct + '%';
+      if(val) val.textContent = count + ' (' + pct + '%)';
+    });
+  }
+
+  function init(){
+    var status = document.getElementById('sync-status');
+    Promise.all([loadLeads(), loadMessages(), loadMappings(), loadTeam(), loadKB()]).then(function(){
+      if(leads.length){ activeId = leads[0].id; }
+      renderChatList();
+      renderChatPanel();
+      renderKanban();
+      renderHomeStats();
+      renderContacts();
+      renderMatrix();
+      renderMarketingBreakdown();
+      renderMappings();
+      renderTeamMembers();
+      renderRotation();
+      renderKB();
+      renderFiles();
+      renderPlayground();
+      if(status){ status.textContent = 'Datos en vivo — ' + leads.length + ' leads (Airtable)'; }
+      if(window.lucide){ window.lucide.createIcons(); }
+    }).catch(function(err){
+      if(status){ status.textContent = 'No se pudo conectar con Airtable: ' + err.message; }
+      console.error(err);
+    });
+  }
+
+  function initials(name){ return name.split(' ').map(function(w){return w[0];}).slice(0,2).join('').toUpperCase(); }
+
+  var CHAT_STAGE_STYLE = {
+    nuevo:{color:'#dbeafe', icon:'user-plus'}, no_contesto:{color:'#f1f5f9', icon:'bell-off'},
+    contactado:{color:'#fbe6f5', icon:'message-square'}, interesado:{color:'#fef3c7', icon:'thumbs-up'},
+    cita:{color:'#ede9fe', icon:'calendar'}, visita:{color:'#dcfce7', icon:'check-circle'},
+    separacion:{color:'#dbeafe', icon:'file-text'}, venta:{color:'#dcfce7', icon:'dollar-sign'},
+    desperfilado:{color:'#fee2e2', icon:'x-square'}
+  };
+  var PROP_STYLE = {
+    'IA Activo':{bg:'#dbeafe', color:'#1d4ed8'}, 'Asignado':{bg:'#fce7f3', color:'#be185d'},
+    'Cerrado':{bg:'#f1f5f9', color:'#475569'}, 'Broker':{bg:'#dcfce7', color:'#15803d'},
+    'Rechazo Contacto':{bg:'#fee2e2', color:'#b91c1c'}
+  };
+  function propStyle(label){ return PROP_STYLE[label] || {bg:'#f1f5f9', color:'#64748b'}; }
+
+  var chatsSearchQuery = '';
+
+  function renderChatList(){
+    var list = document.getElementById('chat-list');
+    list.innerHTML = '';
+    var q = chatsSearchQuery.toLowerCase();
+    var filtered = q ? leads.filter(function(l){ return (l.name||'').toLowerCase().indexOf(q) > -1; }) : leads;
+    filtered.forEach(function(l){
+      var conv = conversations[l.id] || [];
+      var last = conv.length ? conv[conv.length-1].text : '';
+      var lastTime = conv.length ? timeAgo(conv[conv.length-1]._created || l.created) : timeAgo(l.created);
+      var st = CHAT_STAGE_STYLE[l.stage] || {color:'#f1f5f9', icon:'circle'};
+      var syncOk = l.crmSync === 'Sincronizado';
+      var ps = propStyle(l.propiedad);
+      var div = document.createElement('div');
+      div.className = 'chat-item' + (l.id===activeId ? ' active' : '');
+      div.innerHTML =
+        '<div class="avatar-sm">'+initials(l.name)+'</div>'+
+        '<div class="meta">'+
+          '<div style="display:flex; justify-content:space-between; gap:6px;">'+
+            '<div class="name">'+l.name+'</div>'+
+            '<div class="chat-time">'+lastTime+'</div>'+
+          '</div>'+
+          '<div class="preview">'+(last || 'Sin mensajes')+'</div>'+
+          '<div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px; gap:6px;">'+
+            '<div style="display:flex; align-items:center; gap:6px; min-width:0;">'+
+              '<span class="chat-tag" style="background:'+st.color+';"><i data-lucide="'+st.icon+'" style="width:9px;height:9px;"></i> '+l.tag+'</span>'+
+              '<span class="chat-crm-mini '+(syncOk?'ok':'')+'">CRM: <i data-lucide="'+(syncOk?'check':'refresh-cw')+'"></i></span>'+
+            '</div>'+
+            '<span class="chat-status-pill-mini" style="background:'+ps.bg+'; color:'+ps.color+';">'+(l.propiedad||'Sin asignar')+'</span>'+
+          '</div>'+
+        '</div>';
+      div.addEventListener('click', function(){ activeId = l.id; renderChatList(); renderChatPanel(); });
+      list.appendChild(div);
+    });
+    if(window.lucide) window.lucide.createIcons();
+  }
+
+  function updateAiLockBanner(){
+    var banner = document.getElementById('ai-lock-banner');
+    var input = document.getElementById('msg-input');
+    var btn = document.getElementById('send-btn');
+    if(!banner || !input || !btn) return;
+    if(aiOn){
+      banner.classList.remove('hidden');
+      input.disabled = true;
+      btn.disabled = true;
+      input.placeholder = 'La IA está respondiendo...';
+    } else {
+      banner.classList.add('hidden');
+      input.disabled = false;
+      btn.disabled = false;
+      input.placeholder = 'Escribe un mensaje...';
+    }
+  }
+
+  function renderChatPanel(){
+    var lead = leads.find(function(l){return l.id===activeId;});
+    if(!lead) return;
+    document.getElementById('chat-name').textContent = lead.name;
+    var st = CHAT_STAGE_STYLE[lead.stage] || {color:'#f1f5f9', icon:'circle'};
+    var tagEl = document.getElementById('chat-tag');
+    tagEl.style.background = st.color;
+    tagEl.innerHTML = '<i data-lucide="'+st.icon+'" style="width:10px;height:10px;"></i> '+lead.tag;
+    var ps = propStyle(lead.propiedad);
+    var statusEl = document.getElementById('chat-status-pill');
+    statusEl.textContent = lead.propiedad || 'Sin asignar';
+    statusEl.style.background = ps.bg;
+    statusEl.style.color = ps.color;
+    var crmEl = document.getElementById('chat-crm-pill');
+    var syncOk = lead.crmSync === 'Sincronizado';
+    crmEl.classList.toggle('pending', !syncOk);
+    crmEl.innerHTML = '<i data-lucide="'+(syncOk?'check':'refresh-cw')+'" style="width:11px;height:11px;"></i> '+(syncOk?'CRM Actualizado':'CRM Pendiente');
+    var box = document.getElementById('chat-messages');
+    box.innerHTML = '';
+    var conv = conversations[lead.id]||[];
+    conv.forEach(function(m){
+      var b = document.createElement('div');
+      b.className = 'bubble ' + m.from;
+      b.textContent = m.text;
+      box.appendChild(b);
+    });
+    box.scrollTop = box.scrollHeight;
+    document.getElementById('chat-msg-count').textContent = conv.length;
+    updateAiLockBanner();
+    if(window.lucide) window.lucide.createIcons();
+  }
+
+  document.getElementById('ai-switch').addEventListener('click', function(){
+    aiOn = !aiOn;
+    this.classList.toggle('on', aiOn);
+    updateAiLockBanner();
+  });
+
+  var chatsSearchEl = document.getElementById('chats-search');
+  if(chatsSearchEl) chatsSearchEl.addEventListener('input', function(e){ chatsSearchQuery = e.target.value; renderChatList(); });
+
+  document.getElementById('send-btn').addEventListener('click', sendMsg);
+  document.getElementById('msg-input').addEventListener('keydown', function(e){ if(e.key==='Enter') sendMsg(); });
+  function sendMsg(){
+    if(aiOn || !activeId) return;
+    var input = document.getElementById('msg-input');
+    var text = input.value.trim();
+    if(!text) return;
+    var leadId = activeId;
+    conversations[leadId] = conversations[leadId] || [];
+    conversations[leadId].push({from:'bot', text:text, _created:new Date().toISOString()});
+    input.value = '';
+    renderChatPanel();
+    renderChatList();
+    createMessage(leadId, 'bot', text).catch(function(err){ console.error('No se pudo guardar el mensaje:', err); });
+  }
+
+  // KANBAN
+  var kStages = [
+    {id:'nuevo', name:'Nuevo Lead', color:'#dbeafe', icon:'user-plus'},
+    {id:'no_contesto', name:'No Contesto', color:'#f1f5f9', icon:'bell-off'},
+    {id:'contactado', name:'Contactado', color:'#fbe6f5', icon:'message-square'},
+    {id:'interesado', name:'Interesado', color:'#fef3c7', icon:'thumbs-up'},
+    {id:'cita', name:'Cita', color:'#ede9fe', icon:'calendar'},
+    {id:'visita', name:'Visita', color:'#dcfce7', icon:'check-circle'},
+    {id:'separacion', name:'Separación', color:'#dbeafe', icon:'file-text'},
+    {id:'venta', name:'Venta', color:'#dcfce7', icon:'dollar-sign'},
+    {id:'desperfilado', name:'Desperfilado', color:'#fee2e2', icon:'x-square'},
+  ];
+
+  function renderKanban(){
+    var board = document.getElementById('kanban-board');
+    if(!board) return;
+    board.innerHTML = '';
+    var source = kanbanFilter === 'activos' ? leads.filter(function(l){ return l.stage !== 'desperfilado'; }) : leads;
+    kStages.forEach(function(stage){
+      var col = document.createElement('div');
+      col.className = 'kanban-col';
+      col.dataset.stage = stage.id;
+      var stageLeads = source.filter(function(l){return l.stage===stage.id;});
+      var header = document.createElement('div');
+      header.className = 'kanban-col-header';
+      header.style.background = stage.color;
+      header.innerHTML = '<span><i data-lucide="'+stage.icon+'" style="width:12px;height:12px; vertical-align:-2px;"></i> '+stage.name+'</span><span class="badge-count">'+stageLeads.length+'</span>';
+      col.appendChild(header);
+      if(!stageLeads.length){
+        var empty = document.createElement('div');
+        empty.className = 'muted';
+        empty.style.cssText = 'text-align:center; padding:30px 8px; font-size:12px;';
+        empty.textContent = 'No hay leads en esta etapa';
+        col.appendChild(empty);
+      }
+      stageLeads.forEach(function(lead){
+        var card = document.createElement('div');
+        card.className = 'kanban-card';
+        card.draggable = true;
+        var syncOk = lead.crmSync === 'Sincronizado';
+        var msgCount = (conversations[lead.id]||[]).length;
+        card.innerHTML =
+          '<div class="kc-top">'+
+            '<div style="display:flex; gap:6px; align-items:center; min-width:0;">'+
+              '<div class="kc-avatar">'+initials(lead.name)+'</div>'+
+              '<div class="name" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:110px;">'+lead.name+'</div>'+
+            '</div>'+
+            '<span class="kc-sync '+(syncOk?'ok':'pending')+'"><i data-lucide="'+(syncOk?'check':'refresh-cw')+'" style="width:10px;height:10px;"></i></span>'+
+          '</div>'+
+          '<span class="kc-tag" style="background:'+stage.color+';">'+lead.tag+'</span>'+
+          '<div class="kc-foot"><span><i data-lucide="message-circle" style="width:11px;height:11px; vertical-align:-2px;"></i> '+msgCount+'</span><span>'+timeAgo(lead.created)+'</span></div>'+
+          (lead.propiedad ? '<div class="kc-foot"><span></span><span class="pill" style="background:var(--bg); font-size:9.5px;">'+lead.propiedad+'</span></div>' : '');
+        card.addEventListener('dragstart', function(e){ e.dataTransfer.setData('text/plain', lead.id); });
+        col.appendChild(card);
+      });
+      col.addEventListener('dragover', function(e){ e.preventDefault(); });
+      col.addEventListener('drop', function(e){
+        e.preventDefault();
+        var id = e.dataTransfer.getData('text/plain');
+        var lead = leads.find(function(l){return l.id===id;});
+        if(lead && lead.stage !== stage.id){
+          lead.stage = stage.id;
+          lead.tag = STAGE_TAGS[stage.id] || stage.id;
+          renderKanban();
+          renderChatList();
+          renderHomeStats();
+          renderContacts();
+          updateLeadStage(id, stage.id).catch(function(err){ console.error('No se pudo actualizar la etapa:', err); });
+        }
+      });
+      board.appendChild(col);
+    });
+    if(window.lucide) window.lucide.createIcons();
+  }
+
+  // CALENDAR
+  function renderCalendar(){
+    var grid = document.getElementById('cal-grid');
+    grid.innerHTML = '';
+    var days = ['Lun 12','Mar 13','Mié 14','Jue 15','Vie 16'];
+    var hours = ['9:00','10:00','11:00','12:00','13:00','14:00'];
+    grid.appendChild(Object.assign(document.createElement('div'), {className:'cal-head', textContent:''}));
+    days.forEach(function(d){ grid.appendChild(Object.assign(document.createElement('div'), {className:'cal-head', textContent:d})); });
+    var appts = {'10:00_1':'María López - Showroom', '11:00_3':'Carlos Ruiz - Tour Virtual', '13:00_0':'Pedro Ríos - Follow-up', '14:00_4':'Roberto Díaz - Tour'};
+    hours.forEach(function(h){
+      grid.appendChild(Object.assign(document.createElement('div'), {className:'cal-time', textContent:h}));
+      for(var i=0;i<5;i++){
+        var cell = document.createElement('div');
+        cell.className = 'cal-cell';
+        var key = h+'_'+i;
+        if(appts[key]){
+          var a = document.createElement('div');
+          a.className = 'appt';
+          a.textContent = appts[key];
+          cell.appendChild(a);
+        }
+        grid.appendChild(cell);
+      }
+    });
+  }
+  renderCalendar();
+
+  // MATRIX (calculada de leads reales agrupados por fuente)
+  function renderMatrix(){
+    var m = document.getElementById('matrix');
+    if(!m || !leads.length) return;
+    m.innerHTML = '';
+    var apptStages = ['cita','visita','separacion','venta'];
+    var bySource = {};
+    leads.forEach(function(l){
+      var src = l.source || 'sin fuente';
+      bySource[src] = bySource[src] || [];
+      bySource[src].push(l);
+    });
+    var entries = Object.keys(bySource).map(function(src){
+      var arr = bySource[src];
+      var n = arr.length;
+      var rate = n ? (arr.filter(function(l){return apptStages.indexOf(l.stage)>-1;}).length / n) * 100 : 0;
+      return {src:src, n:n, rate:rate};
+    });
+    var maxN = Math.max.apply(null, entries.map(function(e){return e.n;}).concat([1]));
+    var maxRate = Math.max.apply(null, entries.map(function(e){return e.rate;}).concat([10]));
+    entries.forEach(function(e){
+      var color = e.rate >= 30 ? 'var(--green)' : (e.rate >= 15 ? 'var(--blue)' : (e.n <= 1 ? 'var(--red)' : 'var(--amber)'));
+      var d = document.createElement('div');
+      d.className = 'matrix-dot';
+      d.title = e.src + ': ' + e.n + ' leads, ' + e.rate.toFixed(1) + '% citas+';
+      d.style.left = Math.min(94, (e.n / maxN) * 88 + 4) + '%';
+      d.style.bottom = Math.min(94, (e.rate / maxRate) * 88 + 4) + '%';
+      d.style.background = color;
+      m.appendChild(d);
+    });
+  }
+
+  // TABS: marketing / team / sales-assistant
+  document.querySelectorAll('[data-mkt-tab]').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      document.querySelectorAll('[data-mkt-tab]').forEach(function(t){t.classList.remove('active');});
+      tab.classList.add('active');
+      document.querySelectorAll('.mkt-page').forEach(function(p){p.classList.remove('active');});
+      document.getElementById('mkt-' + tab.dataset.mktTab).classList.add('active');
+    });
+  });
+  document.querySelectorAll('[data-team-tab]').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      document.querySelectorAll('[data-team-tab]').forEach(function(t){t.classList.remove('active');});
+      tab.classList.add('active');
+      document.querySelectorAll('.team-page').forEach(function(p){p.classList.remove('active');});
+      document.getElementById('team-' + tab.dataset.teamTab).classList.add('active');
+    });
+  });
+  document.querySelectorAll('[data-sa-tab]').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      document.querySelectorAll('[data-sa-tab]').forEach(function(t){t.classList.remove('active');});
+      tab.classList.add('active');
+      document.querySelectorAll('.sa-page').forEach(function(p){p.classList.remove('active');});
+      document.getElementById('sa-' + tab.dataset.saTab).classList.add('active');
+    });
+  });
+
+  // KANBAN TOOLBAR
+  document.querySelectorAll('[data-kanban-filter]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('[data-kanban-filter]').forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active');
+      kanbanFilter = btn.dataset.kanbanFilter;
+      renderKanban();
+    });
+  });
+  var kanbanDownloadBtn = document.getElementById('kanban-download');
+  if(kanbanDownloadBtn) kanbanDownloadBtn.addEventListener('click', function(){
+    var rows = leads.map(function(l){ return {Nombre:l.name, Telefono:l.phone, Etapa:l.tag, Propiedad:l.propiedad, Fuente:l.source}; });
+    downloadCSV('kanban.csv', rows, ['Nombre','Telefono','Etapa','Propiedad','Fuente']);
+  });
+
+  // CONTACTS
+  var contactsSearchEl = document.getElementById('contacts-search');
+  if(contactsSearchEl) contactsSearchEl.addEventListener('input', function(e){ contactsSearch = e.target.value; contactsPage = 0; renderContacts(); });
+  var contactsStageEl = document.getElementById('contacts-stage-filter');
+  if(contactsStageEl) contactsStageEl.addEventListener('change', function(e){ contactsStageFilter = e.target.value; contactsPage = 0; renderContacts(); });
+  var contactsPrevBtn = document.getElementById('contacts-prev');
+  if(contactsPrevBtn) contactsPrevBtn.addEventListener('click', function(){ contactsPage--; renderContacts(); });
+  var contactsNextBtn = document.getElementById('contacts-next');
+  if(contactsNextBtn) contactsNextBtn.addEventListener('click', function(){ contactsPage++; renderContacts(); });
+  document.querySelectorAll('#contacts-table th[data-sort]').forEach(function(th){
+    th.addEventListener('click', function(){
+      var key = th.dataset.sort;
+      if(contactsSort.key === key){ contactsSort.dir = contactsSort.dir === 'asc' ? 'desc' : 'asc'; }
+      else { contactsSort = {key:key, dir:'asc'}; }
+      renderContacts();
+    });
+  });
+  var contactsDownloadBtn = document.getElementById('contacts-download');
+  if(contactsDownloadBtn) contactsDownloadBtn.addEventListener('click', function(){
+    var all = getFilteredContacts();
+    var rows = all.map(function(l){ return {Nombre:l.name, Correo:l.email, Telefono:l.phone, Etapa:l.tag, Propiedad:l.propiedad, CRM:l.crmSync, Fuente:l.source, Representante:l.salesRep, Creado:fmtDate(l.created)}; });
+    downloadCSV('contactos.csv', rows, ['Nombre','Correo','Telefono','Etapa','Propiedad','CRM','Fuente','Representante','Creado']);
+  });
+
+  // MARKETING: mapeo de whatsapp
+  var mappingAddBtn = document.getElementById('mapping-add');
+  if(mappingAddBtn) mappingAddBtn.addEventListener('click', function(){
+    var msg = prompt('Mensaje de entrada que dispara este mapeo:');
+    if(!msg) return;
+    airtableFetch('/' + CAMPAIGNS_TABLE, {method:'POST', body:JSON.stringify({fields:{Message:msg}})}).then(function(r){
+      campaignMappings.push({id:r.id, message:msg, platform:'', campaign:'', adset:'', ad:''});
+      renderMappings();
+    }).catch(function(err){ console.error(err); alert('No se pudo crear el mapeo'); });
+  });
+
+  // SALES ASSISTANT: playground
+  var playgroundNewBtn = document.getElementById('playground-new-chat');
+  if(playgroundNewBtn) playgroundNewBtn.addEventListener('click', function(){
+    playgroundConversation = [];
+    playgroundRunning = false;
+    renderPlayground();
+    setPlaygroundStatus('Nuevo chat listo.');
+    var btn = document.getElementById('playground-autoplay');
+    if(btn){ btn.innerHTML = '<i data-lucide="play"></i> Iniciar conversación automática'; if(window.lucide) window.lucide.createIcons(); }
+  });
+  var playgroundPersonaEl = document.getElementById('playground-persona');
+  if(playgroundPersonaEl) playgroundPersonaEl.addEventListener('change', function(e){ playgroundPersona = e.target.value; });
+  var playgroundAutoplayBtn = document.getElementById('playground-autoplay');
+  if(playgroundAutoplayBtn) playgroundAutoplayBtn.addEventListener('click', function(){
+    if(playgroundRunning){ playgroundRunning = false; }
+    else { playgroundAutoplay(); }
+  });
+  var playgroundSendBtn = document.getElementById('playground-send');
+  if(playgroundSendBtn) playgroundSendBtn.addEventListener('click', sendPlaygroundMsg);
+  var playgroundInputEl = document.getElementById('playground-input');
+  if(playgroundInputEl) playgroundInputEl.addEventListener('keydown', function(e){ if(e.key==='Enter') sendPlaygroundMsg(); });
+
+  // INTEGRATIONS
+  var testAirtableBtn = document.getElementById('test-airtable');
+  if(testAirtableBtn) testAirtableBtn.addEventListener('click', function(){
+    var statusEl = document.getElementById('airtable-status');
+    statusEl.textContent = 'Probando conexión...';
+    loadLeads().then(function(){
+      statusEl.textContent = '✓ Conectado — ' + leads.length + ' leads sincronizados';
+    }).catch(function(err){
+      statusEl.textContent = '✗ Error: ' + err.message;
+    });
+  });
+
+  init();
+</script>
+
+</body>
+</html>
