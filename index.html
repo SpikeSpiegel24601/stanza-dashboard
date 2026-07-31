@@ -122,9 +122,33 @@
         <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
           <button class="btn active" data-home-mode="nuevos">Nuevos</button>
           <button class="btn" data-home-mode="activos">Activos</button>
-          <button class="btn" id="home-month-prev" style="padding:6px 10px;"><i data-lucide="chevron-left" style="width:14px;height:14px;"></i></button>
-          <button class="btn" style="pointer-events:none;"><i data-lucide="calendar" style="width:14px;height:14px;vertical-align:-2px;"></i> <span id="home-month-label">julio 2026</span></button>
-          <button class="btn" id="home-month-next" style="padding:6px 10px;"><i data-lucide="chevron-right" style="width:14px;height:14px;"></i></button>
+          <div style="position:relative;">
+            <button class="btn" id="home-range-btn"><i data-lucide="calendar" style="width:14px;height:14px;vertical-align:-2px;"></i> <span id="home-range-label">julio 2026</span> <i data-lucide="chevron-down" style="width:12px;height:12px;vertical-align:-1px;"></i></button>
+            <div id="home-range-popover" style="display:none; position:absolute; top:calc(100% + 6px); right:0; z-index:500; width:300px; background:var(--card); border:1px solid var(--border); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.15); padding:16px;">
+              <div style="font-weight:600; font-size:11px; text-transform:uppercase; color:var(--muted); margin-bottom:8px;">Periodo</div>
+              <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;">
+                <button class="btn" data-home-preset="hoy" style="padding:5px 9px; font-size:12px;">Hoy</button>
+                <button class="btn" data-home-preset="ayer" style="padding:5px 9px; font-size:12px;">Ayer</button>
+                <button class="btn" data-home-preset="semana" style="padding:5px 9px; font-size:12px;">Esta semana</button>
+                <button class="btn" data-home-preset="mes" style="padding:5px 9px; font-size:12px;">Este mes</button>
+                <button class="btn" data-home-preset="mes_anterior" style="padding:5px 9px; font-size:12px;">Mes anterior</button>
+              </div>
+              <label style="font-size:11px; color:var(--muted);">Desde</label>
+              <input type="date" id="home-range-start" style="width:100%; padding:7px 9px; border-radius:8px; border:1px solid var(--border); background:var(--card); color:var(--text); margin:4px 0 10px; font-size:13px;" />
+              <label style="font-size:11px; color:var(--muted);">Hasta</label>
+              <input type="date" id="home-range-end" style="width:100%; padding:7px 9px; border-radius:8px; border:1px solid var(--border); background:var(--card); color:var(--text); margin:4px 0 12px; font-size:13px;" />
+              <label style="display:flex; align-items:center; gap:6px; font-size:12.5px; margin-bottom:10px; cursor:pointer;">
+                <input type="checkbox" id="home-compare-toggle" /> Comparar con otro periodo
+              </label>
+              <div id="home-compare-fields" style="display:none;">
+                <label style="font-size:11px; color:var(--muted);">Desde (comparación)</label>
+                <input type="date" id="home-compare-start" style="width:100%; padding:7px 9px; border-radius:8px; border:1px solid var(--border); background:var(--card); color:var(--text); margin:4px 0 10px; font-size:13px;" />
+                <label style="font-size:11px; color:var(--muted);">Hasta (comparación)</label>
+                <input type="date" id="home-compare-end" style="width:100%; padding:7px 9px; border-radius:8px; border:1px solid var(--border); background:var(--card); color:var(--text); margin:4px 0 12px; font-size:13px;" />
+              </div>
+              <button class="btn" id="home-range-apply" style="width:100%; background:var(--purple); color:#fff; border:none; font-weight:600;">Aplicar</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -820,8 +844,16 @@
   var mktSortDir = 'desc';
   var MKT_MONTH_NAMES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
   var homeMode = 'nuevos';
-  var homeMonthAnchor = new Date();
   var homeFunnelOrder = 'cronologico';
+  var homeRangeStart = (function(){ var n=new Date(); return new Date(n.getFullYear(), n.getMonth(), 1); })();
+  var homeRangeEnd = (function(){ var n=new Date(); return new Date(n.getFullYear(), n.getMonth()+1, 0); })();
+  var homeCompareEnabled = false;
+  var homeCompareStart = null;
+  var homeCompareEnd = null;
+  function homeStartOfDay(d){ var x = new Date(d); x.setHours(0,0,0,0); return x; }
+  function homeEndOfDay(d){ var x = new Date(d); x.setHours(23,59,59,999); return x; }
+  function homeFmtISO(d){ var y=d.getFullYear(), m=(d.getMonth()+1), day=d.getDate(); return y+'-'+(m<10?'0':'')+m+'-'+(day<10?'0':'')+day; }
+  function homeParseISO(s){ var parts = s.split('-'); return new Date(parseInt(parts[0],10), parseInt(parts[1],10)-1, parseInt(parts[2],10)); }
   var contactsPage = 0, contactsPageSize = 10, contactsSearch = '', contactsStageFilter = '', contactsSort = {key:'created', dir:'desc'};
   var campaignMappings = [], teamMembers = [], knowledgeBase = [];
 
@@ -1102,18 +1134,31 @@
     });
   }
 
-  // Leads del mes seleccionado en el Home, según el modo Nuevos/Activos.
-  // "Nuevos" = creados dentro del mes. "Activos" = creados dentro del mes
+  // Leads del periodo seleccionado en el Home, según el modo Nuevos/Activos.
+  // "Nuevos" = creados dentro del rango. "Activos" = creados dentro del rango
   // y que no estén Desperfilados (misma regla que ya usa el filtro del Kanban).
-  function homeFilteredLeads(){
-    var y = homeMonthAnchor.getFullYear(), mo = homeMonthAnchor.getMonth();
+  // Acepta un rango explícito (para el periodo de comparación); si no se pasa,
+  // usa el rango principal seleccionado (homeRangeStart/homeRangeEnd).
+  function homeFilteredLeads(rangeStart, rangeEnd){
+    var startTime = homeStartOfDay(rangeStart || homeRangeStart).getTime();
+    var endTime = homeEndOfDay(rangeEnd || homeRangeEnd).getTime();
     return leads.filter(function(l){
       if(!l.created) return false;
-      var d = new Date(l.created);
-      if(d.getFullYear() !== y || d.getMonth() !== mo) return false;
+      var t = new Date(l.created).getTime();
+      if(t < startTime || t > endTime) return false;
       if(homeMode === 'activos' && l.stage === 'desperfilado') return false;
       return true;
     });
+  }
+
+  // Etiqueta legible del rango seleccionado, ej. "julio 2026", "15 jul 2026" o "3 - 10 ago 2026".
+  function homeRangeLabel(start, end){
+    var sameDay = start.getFullYear()===end.getFullYear() && start.getMonth()===end.getMonth() && start.getDate()===end.getDate();
+    var isFullMonth = start.getDate()===1 && end.getDate()===new Date(end.getFullYear(), end.getMonth()+1, 0).getDate() && start.getMonth()===end.getMonth() && start.getFullYear()===end.getFullYear();
+    if(isFullMonth) return MKT_MONTH_NAMES[start.getMonth()] + ' ' + start.getFullYear();
+    var fmt = function(d){ return d.getDate() + ' ' + MKT_MONTH_NAMES[d.getMonth()].slice(0,3) + ' ' + d.getFullYear(); };
+    if(sameDay) return fmt(start);
+    return fmt(start) + ' - ' + fmt(end);
   }
 
   // Agrupa los leads del mes seleccionado por el nivel de atribución activo.
@@ -1526,11 +1571,8 @@
     });
   }
 
-  function renderHomeStats(){
-    var monthLabel = document.getElementById('home-month-label');
-    if(monthLabel) monthLabel.textContent = MKT_MONTH_NAMES[homeMonthAnchor.getMonth()] + ' ' + homeMonthAnchor.getFullYear();
-
-    var scoped = homeFilteredLeads();
+  // Calcula los 7 indicadores clave a partir de un arreglo de leads ya filtrado.
+  function computeHomeMetrics(scoped){
     var total = scoped.length;
     var advanced = ['contactado','interesado','cita','visita','separacion','venta'];
     var qualifiedStages = ['interesado','cita','visita','separacion','venta'];
@@ -1543,23 +1585,48 @@
     var visits = scoped.filter(function(l){ return visitStages.indexOf(l.stage)>-1; }).length;
     var seps = scoped.filter(function(l){ return sepStages.indexOf(l.stage)>-1; }).length;
     var sales = scoped.filter(function(l){ return l.stage === 'venta'; }).length;
+    return {total:total, contacted:contacted, qualified:qualified, appts:appts, visits:visits, seps:seps, sales:sales};
+  }
 
-    var pct = function(n){ return total ? (Math.round((n/total)*1000)/10) + '%' : '0%'; };
+  // Texto de comparación ("· antes: 10 (+50%)") con color según la dirección del cambio.
+  function homeDeltaHtml(curr, prev){
+    if(!homeCompareEnabled) return '';
+    var diff = curr - prev;
+    var pctChange = prev ? Math.round((diff/prev)*1000)/10 : (curr ? 100 : 0);
+    var sign = diff > 0 ? '+' : '';
+    var color = diff > 0 ? '#15803d' : (diff < 0 ? '#b91c1c' : '#64748b');
+    return ' <span style="color:'+color+'; font-weight:600;">· antes '+prev+' ('+sign+pctChange+'%)</span>';
+  }
+
+  function renderHomeStats(){
+    var rangeLabelEl = document.getElementById('home-range-label');
+    if(rangeLabelEl) rangeLabelEl.textContent = homeRangeLabel(homeRangeStart, homeRangeEnd);
+
+    var scoped = homeFilteredLeads();
+    var m = computeHomeMetrics(scoped);
+    var total = m.total, contacted = m.contacted, qualified = m.qualified, appts = m.appts, visits = m.visits, seps = m.seps, sales = m.sales;
+
+    var cm = null;
+    if(homeCompareEnabled && homeCompareStart && homeCompareEnd){
+      cm = computeHomeMetrics(homeFilteredLeads(homeCompareStart, homeCompareEnd));
+    }
+
+    var pct = function(n, tot){ return tot ? (Math.round((n/tot)*1000)/10) + '%' : '0%'; };
     document.getElementById('stat-total').textContent = total;
     var totalLabelEl = document.getElementById('stat-total-label');
-    if(totalLabelEl) totalLabelEl.textContent = homeMode === 'activos' ? 'leads activos' : 'leads nuevos';
-    document.getElementById('stat-contact-rate').textContent = pct(contacted);
-    document.getElementById('stat-qualified-rate').textContent = pct(qualified);
-    document.getElementById('stat-appt-rate').textContent = pct(appts);
-    document.getElementById('stat-visit-rate').textContent = pct(visits);
-    document.getElementById('stat-sep-rate').textContent = pct(seps);
-    document.getElementById('stat-sale-rate').textContent = pct(sales);
-    document.getElementById('stat-contact-count').textContent = contacted + ' leads';
-    document.getElementById('stat-qualified-count').textContent = qualified + ' leads';
-    document.getElementById('stat-appt-count').textContent = appts + ' leads';
-    document.getElementById('stat-visit-count').textContent = visits + ' leads';
-    document.getElementById('stat-sep-count').textContent = seps + ' leads';
-    document.getElementById('stat-sale-count').textContent = sales + ' leads';
+    if(totalLabelEl) totalLabelEl.innerHTML = (homeMode === 'activos' ? 'leads activos' : 'leads nuevos') + (cm ? homeDeltaHtml(total, cm.total) : '');
+    document.getElementById('stat-contact-rate').textContent = pct(contacted, total);
+    document.getElementById('stat-qualified-rate').textContent = pct(qualified, total);
+    document.getElementById('stat-appt-rate').textContent = pct(appts, total);
+    document.getElementById('stat-visit-rate').textContent = pct(visits, total);
+    document.getElementById('stat-sep-rate').textContent = pct(seps, total);
+    document.getElementById('stat-sale-rate').textContent = pct(sales, total);
+    document.getElementById('stat-contact-count').innerHTML = contacted + ' leads' + (cm ? homeDeltaHtml(contacted, cm.contacted) : '');
+    document.getElementById('stat-qualified-count').innerHTML = qualified + ' leads' + (cm ? homeDeltaHtml(qualified, cm.qualified) : '');
+    document.getElementById('stat-appt-count').innerHTML = appts + ' leads' + (cm ? homeDeltaHtml(appts, cm.appts) : '');
+    document.getElementById('stat-visit-count').innerHTML = visits + ' leads' + (cm ? homeDeltaHtml(visits, cm.visits) : '');
+    document.getElementById('stat-sep-count').innerHTML = seps + ' leads' + (cm ? homeDeltaHtml(seps, cm.seps) : '');
+    document.getElementById('stat-sale-count').innerHTML = sales + ' leads' + (cm ? homeDeltaHtml(sales, cm.sales) : '');
 
     var steps = [
       {stage:'nuevo', label:'Nuevo Lead', count:scoped.filter(function(l){return l.stage==='nuevo';}).length, color:'var(--blue)'},
@@ -2493,7 +2560,7 @@
     });
   });
 
-  // HOME: toggle Nuevos/Activos + navegación de mes + orden del embudo
+  // HOME: toggle Nuevos/Activos + selector de día/rango/comparativo + orden del embudo
   document.querySelectorAll('[data-home-mode]').forEach(function(btn){
     btn.addEventListener('click', function(){
       document.querySelectorAll('[data-home-mode]').forEach(function(b){b.classList.remove('active');});
@@ -2502,19 +2569,79 @@
       renderHomeStats();
     });
   });
-  var homeMonthPrev = document.getElementById('home-month-prev');
-  if(homeMonthPrev) homeMonthPrev.addEventListener('click', function(){
-    homeMonthAnchor = new Date(homeMonthAnchor.getFullYear(), homeMonthAnchor.getMonth()-1, 1);
-    renderHomeStats();
-  });
-  var homeMonthNext = document.getElementById('home-month-next');
-  if(homeMonthNext) homeMonthNext.addEventListener('click', function(){
-    homeMonthAnchor = new Date(homeMonthAnchor.getFullYear(), homeMonthAnchor.getMonth()+1, 1);
-    renderHomeStats();
-  });
   var homeFunnelOrderSel = document.getElementById('home-funnel-order');
   if(homeFunnelOrderSel) homeFunnelOrderSel.addEventListener('change', function(){
     homeFunnelOrder = homeFunnelOrderSel.value;
+    renderHomeStats();
+  });
+
+  // Popover de selección de periodo (día / rango / comparativo)
+  var homeRangeBtn = document.getElementById('home-range-btn');
+  var homeRangePopover = document.getElementById('home-range-popover');
+  var homeRangeStartInput = document.getElementById('home-range-start');
+  var homeRangeEndInput = document.getElementById('home-range-end');
+  var homeCompareToggle = document.getElementById('home-compare-toggle');
+  var homeCompareFields = document.getElementById('home-compare-fields');
+  var homeCompareStartInput = document.getElementById('home-compare-start');
+  var homeCompareEndInput = document.getElementById('home-compare-end');
+
+  function homeSyncInputsFromState(){
+    if(homeRangeStartInput) homeRangeStartInput.value = homeFmtISO(homeRangeStart);
+    if(homeRangeEndInput) homeRangeEndInput.value = homeFmtISO(homeRangeEnd);
+    if(homeCompareToggle) homeCompareToggle.checked = homeCompareEnabled;
+    if(homeCompareFields) homeCompareFields.style.display = homeCompareEnabled ? 'block' : 'none';
+    // Rango de comparación por defecto: el periodo inmediatamente anterior de igual duración.
+    var spanDays = Math.round((homeRangeEnd - homeRangeStart) / 86400000) + 1;
+    var defaultCompareEnd = new Date(homeRangeStart); defaultCompareEnd.setDate(defaultCompareEnd.getDate()-1);
+    var defaultCompareStart = new Date(defaultCompareEnd); defaultCompareStart.setDate(defaultCompareStart.getDate()-(spanDays-1));
+    if(homeCompareStartInput) homeCompareStartInput.value = homeFmtISO(homeCompareStart || defaultCompareStart);
+    if(homeCompareEndInput) homeCompareEndInput.value = homeFmtISO(homeCompareEnd || defaultCompareEnd);
+  }
+
+  if(homeRangeBtn) homeRangeBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    var open = homeRangePopover.style.display === 'block';
+    if(open){ homeRangePopover.style.display = 'none'; }
+    else { homeSyncInputsFromState(); homeRangePopover.style.display = 'block'; }
+  });
+  document.addEventListener('click', function(e){
+    if(homeRangePopover && homeRangePopover.style.display === 'block' && !homeRangePopover.contains(e.target) && e.target !== homeRangeBtn){
+      homeRangePopover.style.display = 'none';
+    }
+  });
+  if(homeRangePopover) homeRangePopover.addEventListener('click', function(e){ e.stopPropagation(); });
+
+  document.querySelectorAll('[data-home-preset]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var now = new Date();
+      var s, e;
+      var preset = btn.dataset.homePreset;
+      if(preset === 'hoy'){ s = new Date(now.getFullYear(), now.getMonth(), now.getDate()); e = new Date(s); }
+      else if(preset === 'ayer'){ e = new Date(now.getFullYear(), now.getMonth(), now.getDate()-1); s = new Date(e); }
+      else if(preset === 'semana'){ var day = now.getDay(); var diffToMonday = (day===0?6:day-1); s = new Date(now.getFullYear(), now.getMonth(), now.getDate()-diffToMonday); e = new Date(now.getFullYear(), now.getMonth(), now.getDate()); }
+      else if(preset === 'mes'){ s = new Date(now.getFullYear(), now.getMonth(), 1); e = new Date(now.getFullYear(), now.getMonth()+1, 0); }
+      else if(preset === 'mes_anterior'){ s = new Date(now.getFullYear(), now.getMonth()-1, 1); e = new Date(now.getFullYear(), now.getMonth(), 0); }
+      if(homeRangeStartInput) homeRangeStartInput.value = homeFmtISO(s);
+      if(homeRangeEndInput) homeRangeEndInput.value = homeFmtISO(e);
+    });
+  });
+
+  if(homeCompareToggle) homeCompareToggle.addEventListener('change', function(){
+    if(homeCompareFields) homeCompareFields.style.display = homeCompareToggle.checked ? 'block' : 'none';
+  });
+
+  var homeRangeApply = document.getElementById('home-range-apply');
+  if(homeRangeApply) homeRangeApply.addEventListener('click', function(){
+    if(homeRangeStartInput && homeRangeStartInput.value) homeRangeStart = homeParseISO(homeRangeStartInput.value);
+    if(homeRangeEndInput && homeRangeEndInput.value) homeRangeEnd = homeParseISO(homeRangeEndInput.value);
+    if(homeRangeEnd < homeRangeStart){ var tmp = homeRangeStart; homeRangeStart = homeRangeEnd; homeRangeEnd = tmp; }
+    homeCompareEnabled = !!(homeCompareToggle && homeCompareToggle.checked);
+    if(homeCompareEnabled){
+      if(homeCompareStartInput && homeCompareStartInput.value) homeCompareStart = homeParseISO(homeCompareStartInput.value);
+      if(homeCompareEndInput && homeCompareEndInput.value) homeCompareEnd = homeParseISO(homeCompareEndInput.value);
+      if(homeCompareEnd && homeCompareStart && homeCompareEnd < homeCompareStart){ var tmp2 = homeCompareStart; homeCompareStart = homeCompareEnd; homeCompareEnd = tmp2; }
+    }
+    homeRangePopover.style.display = 'none';
     renderHomeStats();
   });
 
