@@ -213,7 +213,7 @@
               <span class="chat-crm-pill" id="chat-crm-pill"><i data-lucide="check" style="width:11px;height:11px;"></i> CRM Actualizado</span>
               <span class="muted" style="font-size:12px; display:flex; align-items:center; gap:4px;"><i data-lucide="message-circle" style="width:13px;height:13px;"></i><span id="chat-msg-count">0</span></span>
               <button class="btn" id="chat-schedule-btn" style="display:flex; align-items:center; gap:4px; padding:4px 10px; font-size:11px; white-space:nowrap;"><i data-lucide="calendar-plus" style="width:13px;height:13px;"></i> Agendar cita</button>
-              <i data-lucide="search" style="width:15px;height:15px; color:var(--muted);"></i>
+              <i data-lucide="user" id="chat-profile-btn" style="width:15px;height:15px; color:var(--muted); cursor:pointer;"></i>
             </div>
           </div>
           <div class="chat-messages" id="chat-messages"></div>
@@ -223,6 +223,28 @@
             <input type="text" id="msg-input" placeholder="Escribe un mensaje..." />
             <button class="chat-send-btn" id="send-btn"><i data-lucide="send"></i></button>
           </div>
+        </div>
+      </div>
+
+      <div id="chat-profile-overlay" style="display:none; position:fixed; inset:0; z-index:9000; background:rgba(15,23,42,.35);">
+        <div id="chat-profile-panel" style="position:absolute; top:0; right:0; height:100%; width:380px; max-width:92vw; background:var(--card); box-shadow:-8px 0 24px rgba(0,0,0,.15); overflow-y:auto; padding:24px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div style="width:44px; height:44px; border-radius:50%; background:var(--purple); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px;" id="chat-profile-avatar">A</div>
+              <div>
+                <div style="font-weight:700; font-size:15px;" id="chat-profile-name">-</div>
+                <div class="muted" style="font-size:11px;" id="chat-profile-phone">-</div>
+              </div>
+            </div>
+            <i data-lucide="x" style="cursor:pointer;" id="chat-profile-close"></i>
+          </div>
+          <div style="display:flex; gap:4px; border-bottom:1px solid var(--border); margin-bottom:16px;">
+            <button class="btn active" data-profile-tab="resumen" style="border:none; border-radius:0; border-bottom:2px solid var(--purple); background:none;">Resumen</button>
+            <button class="btn" data-profile-tab="actividades" style="border:none; border-radius:0; background:none;">Actividades</button>
+            <button class="btn" data-profile-tab="notas" style="border:none; border-radius:0; background:none;">Notas</button>
+            <button class="btn" data-profile-tab="citas" style="border:none; border-radius:0; background:none;">Citas</button>
+          </div>
+          <div id="chat-profile-body"></div>
         </div>
       </div>
     </section>
@@ -818,6 +840,9 @@
   var conversations = {};
   var activeId = null;
   var aiOn = true;
+  var profileTab = 'resumen';
+  var profileCitasCache = {};
+  var DISCARD_REASONS = ['Datos de Contacto Incorrectos','Sin Presupuesto','Términos de Pago No Apropiados','Buscando Renta','Spam','Proveedor/Vendedor','Sin Interés'];
 
   function airtableFetch(path, opts){
     opts = opts || {};
@@ -846,6 +871,8 @@
           salesRep: r.fields.SalesRep || 'Ninguno',
           propiedad: r.fields.Propiedad || '',
           crmSync: r.fields.CRMSync || 'Pendiente',
+          discardReason: r.fields.DiscardReason || '',
+          notes: r.fields.Notes || '',
           created: r.createdTime,
         };
       });
@@ -874,7 +901,7 @@
   }
 
   function updateLeadStage(leadId, stage){
-    var body = { fields: { Stage: stage, Tag: STAGE_TAGS[stage] || stage } };
+    var body = { fields: { Stage: stage, Tag: STAGE_TAGS[stage] || stage }, typecast: true };
     return airtableFetch('/' + LEADS_TABLE + '/' + leadId, { method:'PATCH', body: JSON.stringify(body) });
   }
 
@@ -1632,7 +1659,7 @@
             '<span class="chat-status-pill-mini" style="background:'+ps.bg+'; color:'+ps.color+';">'+(l.propiedad||'Sin asignar')+'</span>'+
           '</div>'+
         '</div>';
-      div.addEventListener('click', function(){ activeId = l.id; renderChatList(); renderChatPanel(); });
+      div.addEventListener('click', function(){ activeId = l.id; renderChatList(); renderChatPanel(); closeChatProfile(); });
       list.appendChild(div);
     });
     if(window.lucide) window.lucide.createIcons();
@@ -1688,10 +1715,229 @@
     if(window.lucide) window.lucide.createIcons();
   }
 
+  // PERFIL DEL LEAD (drawer lateral en Chats, estilo Ownmind real)
+  var STAGE_LABELS_FULL = {nuevo:'Nuevo Lead', no_contesto:'No Contesto', contactado:'Contactado', interesado:'Interesado', cita:'Cita', visita:'Visita', separacion:'Separación', venta:'Venta', desperfilado:'Desperfilado'};
+
+  function openChatProfile(){
+    if(!activeId) return;
+    document.getElementById('chat-profile-overlay').style.display = 'block';
+    renderChatProfile();
+  }
+  function closeChatProfile(){
+    document.getElementById('chat-profile-overlay').style.display = 'none';
+  }
+
+  function renderChatProfile(){
+    var lead = leads.find(function(l){return l.id===activeId;});
+    if(!lead) return;
+    document.getElementById('chat-profile-avatar').textContent = (lead.name||'?').charAt(0).toUpperCase();
+    document.getElementById('chat-profile-name').textContent = lead.name;
+    document.getElementById('chat-profile-phone').textContent = lead.phone || 'Sin teléfono';
+    document.querySelectorAll('[data-profile-tab]').forEach(function(b){
+      var on = b.dataset.profileTab === profileTab;
+      b.classList.toggle('active', on);
+      b.style.borderBottom = on ? '2px solid var(--purple)' : 'none';
+      b.style.fontWeight = on ? '700' : '400';
+    });
+    if(profileTab === 'resumen') renderProfileResumen(lead);
+    else if(profileTab === 'actividades') renderProfileActividades(lead);
+    else if(profileTab === 'notas') renderProfileNotas(lead);
+    else if(profileTab === 'citas') renderProfileCitas(lead);
+    if(window.lucide) window.lucide.createIcons();
+  }
+
+  function renderProfileResumen(lead){
+    var body = document.getElementById('chat-profile-body');
+    var stageOptions = Object.keys(STAGE_LABELS_FULL).map(function(s){
+      return '<option value="'+s+'"'+(lead.stage===s?' selected':'')+'>'+STAGE_LABELS_FULL[s]+'</option>';
+    }).join('');
+    var discardOptions = '<option value="">Sin razón</option>' + DISCARD_REASONS.map(function(d){
+      return '<option value="'+d+'"'+(lead.discardReason===d?' selected':'')+'>'+d+'</option>';
+    }).join('');
+    var repOptions = '<option value="Ninguno">Sin asignar</option>' + teamMembers.map(function(m){
+      return '<option value="'+m.name+'"'+(lead.salesRep===m.name?' selected':'')+'>'+m.name+'</option>';
+    }).join('');
+    var origen = [lead.platform, lead.campaign, lead.adset, lead.ad].filter(Boolean).join(' · ') || lead.source || '';
+    var syncOk = lead.crmSync === 'Sincronizado';
+    body.innerHTML =
+      '<div style="font-weight:600; font-size:12px; text-transform:uppercase; color:var(--muted); margin-bottom:8px;">Información de Contacto</div>' +
+      '<label style="font-size:11px; color:var(--muted);">Nombre</label>' +
+      '<input type="text" id="profile-name" value="'+(lead.name||'').replace(/"/g,'&quot;')+'" style="width:100%; padding:8px 10px; border-radius:8px; border:1px solid var(--border); background:var(--card); color:var(--text); margin-bottom:10px; font-size:13px;" />' +
+      '<label style="font-size:11px; color:var(--muted);">Correo electrónico</label>' +
+      '<input type="text" id="profile-email" value="'+(lead.email||'').replace(/"/g,'&quot;')+'" style="width:100%; padding:8px 10px; border-radius:8px; border:1px solid var(--border); background:var(--card); color:var(--text); margin-bottom:10px; font-size:13px;" />' +
+      '<label style="font-size:11px; color:var(--muted);">Teléfono</label>' +
+      '<input type="text" id="profile-phone" value="'+(lead.phone||'').replace(/"/g,'&quot;')+'" style="width:100%; padding:8px 10px; border-radius:8px; border:1px solid var(--border); background:var(--card); color:var(--text); margin-bottom:16px; font-size:13px;" />' +
+      '<div style="font-weight:600; font-size:12px; text-transform:uppercase; color:var(--muted); margin-bottom:8px;">Etapa Comercial</div>' +
+      '<select id="profile-stage" class="btn" style="width:100%; cursor:pointer; margin-bottom:10px;">'+stageOptions+'</select>' +
+      '<label style="font-size:11px; color:var(--muted);">Razón de Descarte</label>' +
+      '<select id="profile-discard" class="btn" style="width:100%; cursor:pointer; margin-bottom:16px;">'+discardOptions+'</select>' +
+      '<div style="font-weight:600; font-size:12px; text-transform:uppercase; color:var(--muted); margin-bottom:8px;">Propietario del Contacto</div>' +
+      '<select id="profile-salesrep" class="btn" style="width:100%; cursor:pointer; margin-bottom:16px;">'+repOptions+'</select>' +
+      '<div style="font-weight:600; font-size:12px; text-transform:uppercase; color:var(--muted); margin-bottom:8px;">Origen del Lead</div>' +
+      '<div class="muted" style="font-size:12.5px; margin-bottom:16px;">'+(origen || 'Sin datos de origen disponibles')+'</div>' +
+      '<button class="btn" id="profile-save-btn" style="width:100%; margin-bottom:8px; background:var(--purple); color:#fff; border:none; font-weight:600;">Actualizar perfil</button>' +
+      '<button class="btn" id="profile-sync-btn" style="width:100%; margin-bottom:8px;"><i data-lucide="'+(syncOk?'check-circle':'refresh-cw')+'" style="width:13px;height:13px; vertical-align:-2px;"></i> '+(syncOk?'Sincronizado con CRM':'Sincronizar con CRM')+'</button>' +
+      '<div class="muted" id="profile-save-status" style="font-size:12px; text-align:center;"></div>';
+
+    document.getElementById('profile-save-btn').addEventListener('click', function(){
+      var statusEl = document.getElementById('profile-save-status');
+      var name = document.getElementById('profile-name').value.trim();
+      var email = document.getElementById('profile-email').value.trim();
+      var phone = document.getElementById('profile-phone').value.trim();
+      var stage = document.getElementById('profile-stage').value;
+      var discard = document.getElementById('profile-discard').value;
+      var rep = document.getElementById('profile-salesrep').value;
+      var fields = { Name: name, Email: email, Phone: phone, Stage: stage, Tag: STAGE_TAGS[stage] || stage, DiscardReason: discard, SalesRep: rep };
+      statusEl.style.color = '#64748b';
+      statusEl.textContent = 'Guardando...';
+      airtableFetch('/' + LEADS_TABLE + '/' + lead.id, { method:'PATCH', body: JSON.stringify({ fields: fields, typecast: true }) })
+        .then(function(){
+          lead.name = name; lead.email = email; lead.phone = phone; lead.stage = stage;
+          lead.tag = STAGE_TAGS[stage] || stage; lead.discardReason = discard; lead.salesRep = rep;
+          statusEl.style.color = '#15803d';
+          statusEl.textContent = '✓ Perfil actualizado';
+          renderChatList(); renderChatPanel(); renderChatProfile();
+        }).catch(function(){
+          statusEl.style.color = '#dc2626';
+          statusEl.textContent = 'No se pudo guardar. Intenta de nuevo.';
+        });
+    });
+
+    document.getElementById('profile-sync-btn').addEventListener('click', function(){
+      var statusEl = document.getElementById('profile-save-status');
+      statusEl.style.color = '#64748b';
+      statusEl.textContent = 'Sincronizando...';
+      airtableFetch('/' + LEADS_TABLE + '/' + lead.id, { method:'PATCH', body: JSON.stringify({ fields: { CRMSync: 'Sincronizado' }, typecast: true }) })
+        .then(function(){
+          lead.crmSync = 'Sincronizado';
+          statusEl.style.color = '#15803d';
+          statusEl.textContent = '✓ Sincronizado con CRM';
+          renderChatPanel(); renderChatProfile();
+        }).catch(function(){
+          statusEl.style.color = '#dc2626';
+          statusEl.textContent = 'No se pudo sincronizar.';
+        });
+    });
+  }
+
+  function renderProfileActividades(lead){
+    var body = document.getElementById('chat-profile-body');
+    var conv = conversations[lead.id] || [];
+    var last = conv.length ? conv[conv.length-1] : null;
+    var createdStr = lead.created ? new Date(lead.created).toLocaleDateString('es-MX', {day:'numeric', month:'long', year:'numeric'}) : '-';
+    body.innerHTML =
+      '<div class="card" style="padding:14px; margin-bottom:14px;">' +
+        '<div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;"><span class="muted">Fecha de creación</span><b>'+createdStr+'</b></div>' +
+        '<div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;"><span class="muted">Total de mensajes</span><b>'+conv.length+'</b></div>' +
+        '<div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;"><span class="muted">Última respuesta</span><b>'+(last ? timeAgo(last._created) : 'Sin mensajes')+'</b></div>' +
+        '<div style="display:flex; justify-content:space-between; font-size:12px;"><span class="muted">Etapa actual</span><b>'+(STAGE_LABELS_FULL[lead.stage]||lead.stage)+'</b></div>' +
+      '</div>' +
+      '<div style="font-weight:600; font-size:12px; text-transform:uppercase; color:var(--muted); margin-bottom:8px;">Actividad reciente</div>' +
+      (conv.length ? conv.slice(-6).reverse().map(function(m){
+        return '<div style="padding:8px 0; border-bottom:1px solid var(--border); font-size:12.5px;"><span style="font-weight:600;">'+(m.from==='bot'?'Nosotros':'Lead')+':</span> '+(m.text||'').slice(0,80)+'</div>';
+      }).join('') : '<div class="muted" style="font-size:13px;">Aún no hay actividad.</div>');
+  }
+
+  function renderProfileNotas(lead){
+    var body = document.getElementById('chat-profile-body');
+    body.innerHTML =
+      '<label style="font-size:11px; color:var(--muted);">Notas internas del equipo</label>' +
+      '<textarea id="profile-notes" rows="8" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--card); color:var(--text); font-size:13px; margin:8px 0 10px; resize:vertical;" placeholder="Aún no hay notas...">'+(lead.notes||'')+'</textarea>' +
+      '<button class="btn" id="profile-notes-save" style="width:100%; background:var(--purple); color:#fff; border:none; font-weight:600;">Guardar nota</button>' +
+      '<div class="muted" id="profile-notes-status" style="font-size:12px; text-align:center; margin-top:8px;"></div>';
+    document.getElementById('profile-notes-save').addEventListener('click', function(){
+      var val = document.getElementById('profile-notes').value;
+      var statusEl = document.getElementById('profile-notes-status');
+      statusEl.style.color = '#64748b';
+      statusEl.textContent = 'Guardando...';
+      airtableFetch('/' + LEADS_TABLE + '/' + lead.id, { method:'PATCH', body: JSON.stringify({ fields: { Notes: val } }) })
+        .then(function(){
+          lead.notes = val;
+          statusEl.style.color = '#15803d';
+          statusEl.textContent = '✓ Nota guardada';
+        }).catch(function(){
+          statusEl.style.color = '#dc2626';
+          statusEl.textContent = 'No se pudo guardar la nota.';
+        });
+    });
+  }
+
+  function renderProfileCitas(lead){
+    var body = document.getElementById('chat-profile-body');
+    if(profileCitasCache[lead.id]){
+      renderCitasList(profileCitasCache[lead.id]);
+      return;
+    }
+    body.innerHTML = '<div class="muted" style="font-size:13px;">Cargando citas...</div>';
+    var backendBase = getBackendBase();
+    if(!backendBase){
+      body.innerHTML = '<div class="muted" style="font-size:13px;">Backend no configurado.</div>';
+      return;
+    }
+    var token = localStorage.getItem('stanza_session_token');
+    var now = new Date();
+    var start = new Date(now.getFullYear(), now.getMonth()-1, 1);
+    var end = new Date(now.getFullYear(), now.getMonth()+3, 1);
+    fetch(backendBase + '/calendar/events?timeMin=' + encodeURIComponent(start.toISOString()) + '&timeMax=' + encodeURIComponent(end.toISOString()), {
+      headers: {'X-Session-Token': token || ''}
+    }).then(function(r){ return r.json().then(function(data){ return {ok:r.ok, data:data}; }); })
+      .then(function(res){
+        var all = (res.ok && res.data.events) || [];
+        var nameLower = (lead.name||'').toLowerCase();
+        var matches = all.filter(function(ev){ return nameLower && (ev.summary||'').toLowerCase().indexOf(nameLower) > -1; });
+        matches.sort(function(a,b){ return new Date(a.start) - new Date(b.start); });
+        profileCitasCache[lead.id] = matches;
+        renderCitasList(matches);
+      }).catch(function(){
+        body.innerHTML = '<div class="muted" style="font-size:13px;">No se pudieron cargar las citas.</div>';
+      });
+    function renderCitasList(matches){
+      if(!matches.length){
+        body.innerHTML = '<div class="muted" style="font-size:13px; margin-bottom:12px;">No hay citas próximas para este lead.</div><button class="btn" id="profile-goto-cal" style="width:100%;"><i data-lucide="calendar" style="width:13px;height:13px; vertical-align:-2px;"></i> Ver Calendario</button>';
+      } else {
+        body.innerHTML = matches.map(function(ev){
+          var d = new Date(ev.start);
+          var fecha = d.toLocaleDateString('es-MX', {day:'numeric', month:'short'}) + ' · ' + (d.getHours()<10?'0':'')+d.getHours()+':'+(d.getMinutes()<10?'0':'')+d.getMinutes();
+          return '<div class="card" style="padding:12px; margin-bottom:10px; cursor:pointer;" data-cal-link="'+(ev.htmlLink||'')+'"><div style="font-weight:600; font-size:13px;">'+ev.summary+'</div><div class="muted" style="font-size:11.5px;">'+fecha+'</div></div>';
+        }).join('') + '<button class="btn" id="profile-goto-cal" style="width:100%; margin-top:4px;"><i data-lucide="calendar" style="width:13px;height:13px; vertical-align:-2px;"></i> Ver Calendario</button>';
+        body.querySelectorAll('[data-cal-link]').forEach(function(card){
+          card.addEventListener('click', function(){
+            var link = card.dataset.calLink;
+            if(link) window.open(link, '_blank');
+          });
+        });
+      }
+      var gotoBtn = document.getElementById('profile-goto-cal');
+      if(gotoBtn) gotoBtn.addEventListener('click', function(){
+        closeChatProfile();
+        document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
+        var calNav = document.querySelector('[data-page="calendar"]');
+        if(calNav) calNav.click();
+      });
+      if(window.lucide) window.lucide.createIcons();
+    }
+  }
+
   document.getElementById('ai-switch').addEventListener('click', function(){
     aiOn = !aiOn;
     this.classList.toggle('on', aiOn);
     updateAiLockBanner();
+  });
+
+  // PERFIL: abrir/cerrar drawer + cambio de pestañas
+  var chatProfileBtn = document.getElementById('chat-profile-btn');
+  if(chatProfileBtn) chatProfileBtn.addEventListener('click', openChatProfile);
+  var chatProfileClose = document.getElementById('chat-profile-close');
+  if(chatProfileClose) chatProfileClose.addEventListener('click', closeChatProfile);
+  var chatProfileOverlay = document.getElementById('chat-profile-overlay');
+  if(chatProfileOverlay) chatProfileOverlay.addEventListener('click', function(e){
+    if(e.target === chatProfileOverlay) closeChatProfile();
+  });
+  document.querySelectorAll('[data-profile-tab]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      profileTab = btn.dataset.profileTab;
+      renderChatProfile();
+    });
   });
 
   var chatsSearchEl = document.getElementById('chats-search');
