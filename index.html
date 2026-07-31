@@ -342,7 +342,11 @@
             <button class="btn active" data-mkt-viewby="conjunto">Conjunto de anuncios</button>
             <button class="btn" data-mkt-viewby="anuncio">Anuncio</button>
           </div>
-          <button class="btn"><i data-lucide="calendar" style="width:13px;height:13px;"></i> julio 2026</button>
+          <div style="display:flex; align-items:center; gap:4px;">
+            <button class="btn" id="mkt-month-prev" style="padding:6px 10px;"><i data-lucide="chevron-left" style="width:14px;height:14px;"></i></button>
+            <button class="btn" style="pointer-events:none;"><i data-lucide="calendar" style="width:13px;height:13px;"></i> <span id="mkt-month-label">julio 2026</span></button>
+            <button class="btn" id="mkt-month-next" style="padding:6px 10px;"><i data-lucide="chevron-right" style="width:14px;height:14px;"></i></button>
+          </div>
         </div>
         <div class="row" style="margin-bottom:16px;">
           <div class="card" style="flex:1; min-width:320px;">
@@ -368,13 +372,38 @@
           </div>
         </div>
         <div class="card">
-          <h2 class="section">Desglose de Rendimiento</h2>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2 class="section" style="margin-bottom:2px;">Desglose de Rendimiento</h2>
+            <span class="muted" style="font-size:11.5px;">Haz clic en cualquier fila para ver detalles</span>
+          </div>
           <div style="overflow-x:auto;">
-            <table>
-              <thead><tr><th>Nombre</th><th>Leads</th><th>Tasa de Contactos</th><th>Tasa de Calificados</th><th>Tasa de Citas</th></tr></thead>
+            <table id="mkt-breakdown-table">
+              <thead><tr>
+                <th data-mkt-sort="nombre" style="cursor:pointer; white-space:nowrap;">Nombre ↕</th>
+                <th data-mkt-sort="n" style="cursor:pointer; white-space:nowrap;">Leads ↕</th>
+                <th data-mkt-sort="contactos" style="cursor:pointer; white-space:nowrap;">Tasa de Contactos ↕</th>
+                <th data-mkt-sort="calificados" style="cursor:pointer; white-space:nowrap;">Tasa de Calificados ↕</th>
+                <th data-mkt-sort="citas" style="cursor:pointer; white-space:nowrap;">Tasa de Citas ↕</th>
+                <th data-mkt-sort="visitas" style="cursor:pointer; white-space:nowrap;">Tasa de Visitas ↕</th>
+                <th data-mkt-sort="separaciones" style="cursor:pointer; white-space:nowrap;">Tasa de Separaciones ↕</th>
+                <th data-mkt-sort="ventas" style="cursor:pointer; white-space:nowrap;">Tasa de Ventas ↕</th>
+              </tr></thead>
               <tbody id="mkt-breakdown"></tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      <div id="mkt-detail-overlay" style="display:none; position:fixed; inset:0; z-index:9000; background:rgba(15,23,42,.35);">
+        <div id="mkt-detail-panel" style="position:absolute; top:0; right:0; height:100%; width:360px; max-width:92vw; background:var(--card); box-shadow:-8px 0 24px rgba(0,0,0,.15); overflow-y:auto; padding:24px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+            <div>
+              <div style="font-weight:700; font-size:16px;" id="mkt-detail-title">-</div>
+              <div class="muted" style="font-size:12px;" id="mkt-detail-subtitle">-</div>
+            </div>
+            <i data-lucide="x" style="cursor:pointer;" id="mkt-detail-close"></i>
+          </div>
+          <div id="mkt-detail-body"></div>
         </div>
       </div>
 
@@ -766,6 +795,11 @@
   var AIRTABLE_API = 'https://api.airtable.com/v0/' + AIRTABLE_BASE;
   var STAGE_TAGS = {nuevo:'Nuevo Lead', no_contesto:'No Contesto', contactado:'Contactado', interesado:'Interesado', cita:'Cita', visita:'Visita', separacion:'Separación', venta:'Venta', desperfilado:'Desperfilado'};
   var kanbanFilter = 'nuevos';
+  var mktViewBy = 'conjunto';
+  var mktMonthAnchor = new Date();
+  var mktSortKey = 'n';
+  var mktSortDir = 'desc';
+  var MKT_MONTH_NAMES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
   var contactsPage = 0, contactsPageSize = 10, contactsSearch = '', contactsStageFilter = '', contactsSort = {key:'created', dir:'desc'};
   var campaignMappings = [], teamMembers = [], knowledgeBase = [];
 
@@ -805,6 +839,10 @@
           tag: r.fields.Tag || (STAGE_TAGS[r.fields.Stage] || 'Nuevo Lead'),
           email: r.fields.Email || '',
           source: r.fields.Source || '',
+          platform: r.fields.Platform || '',
+          campaign: r.fields.Campaign || '',
+          adset: r.fields.AdSet || '',
+          ad: r.fields.Ad || '',
           salesRep: r.fields.SalesRep || 'Ninguno',
           propiedad: r.fields.Propiedad || '',
           crmSync: r.fields.CRMSync || 'Pendiente',
@@ -935,6 +973,45 @@
   }
 
   // MARKETING
+  // Etiqueta automáticamente cada lead (Plataforma/Campaña/Conjunto de anuncios/
+  // Anuncio) comparando su primer mensaje entrante contra la tabla de Mapeo de
+  // WhatsApp. Así el Panel de Atribución puede agrupar de verdad por cualquiera
+  // de esos 4 niveles, igual que en Ownmind. Se corre cada vez que carga el
+  // dashboard; solo toca leads que todavía no tengan ninguno de los 4 campos.
+  function autoTagLeadAttribution(){
+    if(!campaignMappings.length) return;
+    leads.forEach(function(l){
+      if(l.platform || l.campaign || l.adset || l.ad) return;
+      var conv = conversations[l.id] || [];
+      var firstInbound = null;
+      for(var i=0;i<conv.length;i++){
+        if(conv[i].from !== 'bot'){ firstInbound = conv[i]; break; }
+      }
+      if(!firstInbound || !firstInbound.text) return;
+      var text = firstInbound.text.trim().toLowerCase();
+      if(!text) return;
+      var match = null;
+      for(var j=0;j<campaignMappings.length;j++){
+        var cm = campaignMappings[j];
+        var msg = (cm.message||'').trim().toLowerCase();
+        if(msg && (text === msg || text.indexOf(msg) > -1 || msg.indexOf(text) > -1)){ match = cm; break; }
+      }
+      if(!match) return;
+      l.platform = match.platform;
+      l.campaign = match.campaign;
+      l.adset = match.adset;
+      l.ad = match.ad;
+      var fields = {Platform:match.platform, Campaign:match.campaign, AdSet:match.adset, Ad:match.ad};
+      if(!l.source){
+        l.source = match.campaign || match.platform || '';
+        if(l.source) fields.Source = l.source;
+      }
+      airtableFetch('/' + LEADS_TABLE + '/' + l.id, {method:'PATCH', body:JSON.stringify({fields:fields})}).catch(function(err){
+        console.error('No se pudo etiquetar la atribución del lead', l.id, err);
+      });
+    });
+  }
+
   function loadMappings(){
     return airtableFetch('/' + CAMPAIGNS_TABLE + '?pageSize=100').then(function(data){
       campaignMappings = data.records.map(function(r){
@@ -983,17 +1060,51 @@
     if(window.lucide) window.lucide.createIcons();
   }
 
+  // Devuelve el nombre del campo del lead que corresponde al nivel de
+  // agrupación actualmente seleccionado en "Ver por".
+  var MKT_VIEWBY_FIELD = {plataforma:'platform', campana:'campaign', conjunto:'adset', anuncio:'ad'};
+  function mktGroupField(){ return MKT_VIEWBY_FIELD[mktViewBy] || 'adset'; }
+
+  // Leads del mes actualmente seleccionado en el selector "julio 2026".
+  function mktFilteredLeads(){
+    var y = mktMonthAnchor.getFullYear(), mo = mktMonthAnchor.getMonth();
+    return leads.filter(function(l){
+      if(!l.created) return false;
+      var d = new Date(l.created);
+      return d.getFullYear() === y && d.getMonth() === mo;
+    });
+  }
+
+  // Agrupa los leads del mes seleccionado por el nivel de atribución activo.
+  function getMktGroups(){
+    var field = mktGroupField();
+    var groups = {};
+    mktFilteredLeads().forEach(function(l){
+      var key = l[field] || 'sin fuente';
+      groups[key] = groups[key] || [];
+      groups[key].push(l);
+    });
+    return groups;
+  }
+
+  var apptStagesGlobal = ['cita','visita','separacion','venta'];
+
+  function pctBadge(v){ var cls = v>=60?'high':(v>=30?'mid':'low'); return '<span class="badge '+cls+'">'+v.toFixed(1)+'%</span>'; }
+
   function renderMarketingBreakdown(){
-    var total = leads.length;
+    var monthLabel = document.getElementById('mkt-month-label');
+    if(monthLabel) monthLabel.textContent = MKT_MONTH_NAMES[mktMonthAnchor.getMonth()] + ' ' + mktMonthAnchor.getFullYear();
+    var scoped = mktFilteredLeads();
+    var total = scoped.length;
     var advanced = ['contactado','interesado','cita','visita','separacion','venta'];
     var qualifiedStages = ['interesado','cita','visita','separacion','venta'];
-    var apptStages = ['cita','visita','separacion','venta'];
-    var contacted = leads.filter(function(l){return advanced.indexOf(l.stage)>-1;}).length;
-    var qualified = leads.filter(function(l){return qualifiedStages.indexOf(l.stage)>-1;}).length;
-    var appts = leads.filter(function(l){return apptStages.indexOf(l.stage)>-1;}).length;
-    var visits = leads.filter(function(l){return ['visita','separacion','venta'].indexOf(l.stage)>-1;}).length;
-    var sep = leads.filter(function(l){return ['separacion','venta'].indexOf(l.stage)>-1;}).length;
-    var sales = leads.filter(function(l){return l.stage==='venta';}).length;
+    var apptStages = apptStagesGlobal;
+    var contacted = scoped.filter(function(l){return advanced.indexOf(l.stage)>-1;}).length;
+    var qualified = scoped.filter(function(l){return qualifiedStages.indexOf(l.stage)>-1;}).length;
+    var appts = scoped.filter(function(l){return apptStages.indexOf(l.stage)>-1;}).length;
+    var visits = scoped.filter(function(l){return ['visita','separacion','venta'].indexOf(l.stage)>-1;}).length;
+    var sep = scoped.filter(function(l){return ['separacion','venta'].indexOf(l.stage)>-1;}).length;
+    var sales = scoped.filter(function(l){return l.stage==='venta';}).length;
     var steps = [
       {label:'Leads', count:total, color:'var(--purple)'},
       {label:'Contactados', count:contacted, color:'var(--magenta)'},
@@ -1014,15 +1125,9 @@
       }).join('');
     }
 
-    var bySource = {};
-    leads.forEach(function(l){
-      var src = l.source || 'sin fuente';
-      bySource[src] = bySource[src] || [];
-      bySource[src].push(l);
-    });
-    function pctBadge(v){ var cls = v>=60?'high':(v>=30?'mid':'low'); return '<span class="badge '+cls+'">'+v.toFixed(1)+'%</span>'; }
+    var bySource = getMktGroups();
 
-    // Clasifica cada fuente en Alto Rendimiento / Oportunidad / Bajo Objetivo / En Revisión
+    // Clasifica cada grupo en Alto Rendimiento / Oportunidad / Bajo Objetivo / En Revisión
     // usando la misma regla que los puntos de la Matriz de Rendimiento, para que
     // las pastillas, la leyenda y los puntos siempre cuenten lo mismo.
     var catCounts = {alto:0, oportunidad:0, bajo:0, revision:0};
@@ -1048,18 +1153,39 @@
       if(legendEl) legendEl.textContent = catCounts[k];
     });
 
-    var rows = Object.keys(bySource).sort(function(a,b){return bySource[b].length-bySource[a].length;}).map(function(src){
+    var rowData = Object.keys(bySource).map(function(src){
       var arr = bySource[src];
       var n = arr.length;
-      var c = arr.filter(function(l){return advanced.indexOf(l.stage)>-1;}).length;
-      var q = arr.filter(function(l){return qualifiedStages.indexOf(l.stage)>-1;}).length;
-      var a2 = arr.filter(function(l){return apptStages.indexOf(l.stage)>-1;}).length;
-      function pct(x){ return n ? (x/n)*100 : 0; }
-      var label = src==='sin fuente' ? '<span class="muted">⚠ sin fuente</span>' : src;
-      return '<tr><td>'+label+'</td><td>'+n+'</td><td>'+pctBadge(pct(c))+'</td><td>'+pctBadge(pct(q))+'</td><td>'+pctBadge(pct(a2))+'</td></tr>';
+      function rate(stages){ return n ? (arr.filter(function(l){return stages.indexOf(l.stage)>-1;}).length / n) * 100 : 0; }
+      return {
+        nombre: src,
+        n: n,
+        contactos: rate(advanced),
+        calificados: rate(qualifiedStages),
+        citas: rate(apptStages),
+        visitas: rate(['visita','separacion','venta']),
+        separaciones: rate(['separacion','venta']),
+        ventas: rate(['venta']),
+      };
+    });
+    rowData.sort(function(a,b){
+      var av = a[mktSortKey], bv = b[mktSortKey];
+      if(typeof av === 'string'){ av = av.toLowerCase(); bv = bv.toLowerCase(); }
+      if(av < bv) return mktSortDir==='asc' ? -1 : 1;
+      if(av > bv) return mktSortDir==='asc' ? 1 : -1;
+      return 0;
+    });
+    var rows = rowData.map(function(r){
+      var label = r.nombre==='sin fuente' ? '<span class="muted">⚠ sin fuente</span>' : r.nombre;
+      return '<tr data-mkt-row="'+r.nombre.replace(/"/g,'&quot;')+'" style="cursor:pointer;"><td>'+label+'</td><td>'+r.n+'</td><td>'+pctBadge(r.contactos)+'</td><td>'+pctBadge(r.calificados)+'</td><td>'+pctBadge(r.citas)+'</td><td>'+pctBadge(r.visitas)+'</td><td>'+pctBadge(r.separaciones)+'</td><td>'+pctBadge(r.ventas)+'</td></tr>';
     }).join('');
     var bd = document.getElementById('mkt-breakdown');
-    if(bd) bd.innerHTML = rows;
+    if(bd){
+      bd.innerHTML = rows;
+      bd.querySelectorAll('[data-mkt-row]').forEach(function(tr){
+        tr.addEventListener('click', function(){ openMktDetail(tr.getAttribute('data-mkt-row'), bySource[tr.getAttribute('data-mkt-row')] || []); });
+      });
+    }
 
     var sinFuenteEl = document.getElementById('pill-sin-fuente');
     if(sinFuenteEl){
@@ -1067,6 +1193,57 @@
       var pct17 = total ? Math.round((sinFuente/total)*1000)/10 : 0;
       sinFuenteEl.textContent = '⚠ ' + sinFuente + ' sin fuente (' + pct17 + '%)';
     }
+    if(window.lucide) window.lucide.createIcons();
+  }
+
+  // Panel lateral de detalle: embudo completo de un grupo + hallazgos automáticos,
+  // igual que al hacer clic en una fila del Desglose de Rendimiento real.
+  function openMktDetail(name, arr){
+    var n = arr.length;
+    function rate(stages){ return n ? (arr.filter(function(l){return stages.indexOf(l.stage)>-1;}).length / n) * 100 : 0; }
+    var metrics = [
+      {label:'Tasa de Contactos', count: arr.filter(function(l){return ['contactado','interesado','cita','visita','separacion','venta'].indexOf(l.stage)>-1;}).length, rate: rate(['contactado','interesado','cita','visita','separacion','venta'])},
+      {label:'Tasa de Calificados', count: arr.filter(function(l){return ['interesado','cita','visita','separacion','venta'].indexOf(l.stage)>-1;}).length, rate: rate(['interesado','cita','visita','separacion','venta'])},
+      {label:'Tasa de Citas', count: arr.filter(function(l){return apptStagesGlobal.indexOf(l.stage)>-1;}).length, rate: rate(apptStagesGlobal)},
+      {label:'Tasa de Visitas', count: arr.filter(function(l){return ['visita','separacion','venta'].indexOf(l.stage)>-1;}).length, rate: rate(['visita','separacion','venta'])},
+      {label:'Tasa de Separaciones', count: arr.filter(function(l){return ['separacion','venta'].indexOf(l.stage)>-1;}).length, rate: rate(['separacion','venta'])},
+      {label:'Tasa de Ventas', count: arr.filter(function(l){return l.stage==='venta';}).length, rate: rate(['venta'])},
+    ];
+    var citas = arr.filter(function(l){return apptStagesGlobal.indexOf(l.stage)>-1;}).length;
+    var visitas = arr.filter(function(l){return ['visita','separacion','venta'].indexOf(l.stage)>-1;}).length;
+    var ventas = arr.filter(function(l){return l.stage==='venta';}).length;
+
+    var hallazgos = [];
+    if(n <= 2){
+      hallazgos.push({tone:'info', title:'Bajo volumen.', text:'Los datos aún no son estadísticamente significativos.'});
+    }
+    if(citas > 0 && visitas === 0){
+      hallazgos.push({tone:'warn', title:'Alta tasa de inasistencia.', text:'Refuerza el seguimiento del equipo para confirmar visitas.'});
+    }
+    if(n > 3 && (citas/n)*100 < 15){
+      hallazgos.push({tone:'warn', title:'Baja tasa de citas.', text:'Revisa el mensaje o la segmentación de este grupo.'});
+    }
+    if(visitas > 0 && ventas === visitas){
+      hallazgos.push({tone:'good', title:'Alta conversión a venta.', text:'Este grupo convierte muy bien de visita a venta.'});
+    }
+    if(!hallazgos.length){
+      hallazgos.push({tone:'info', title:'Sin hallazgos relevantes.', text:'Este grupo se comporta dentro de lo esperado.'});
+    }
+    var toneStyle = {warn:'background:#fef3c7; border-color:#fde68a; color:#92400e;', info:'background:#dbeafe; border-color:#bfdbfe; color:#1d4ed8;', good:'background:#dcfce7; border-color:#bbf7d0; color:#15803d;'};
+
+    document.getElementById('mkt-detail-title').textContent = name==='sin fuente' ? 'Sin fuente' : name;
+    document.getElementById('mkt-detail-subtitle').textContent = n + ' lead' + (n===1?'':'s') + ' · ' + MKT_MONTH_NAMES[mktMonthAnchor.getMonth()] + ' ' + mktMonthAnchor.getFullYear();
+    var body = document.getElementById('mkt-detail-body');
+    body.innerHTML =
+      '<div style="font-weight:700; font-size:12.5px; margin-bottom:8px;">Desglose Completo del Embudo</div>' +
+      metrics.map(function(m){
+        return '<div style="margin-bottom:10px;"><div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:3px;"><span>'+m.label+'</span><span>'+m.count+' '+pctBadge(m.rate)+'</span></div><div class="funnel-bar-track" style="height:5px;"><div class="funnel-bar-fill" style="height:100%; width:'+m.rate+'%; background:var(--magenta);"></div></div></div>';
+      }).join('') +
+      '<div style="font-weight:700; font-size:12.5px; margin:16px 0 8px;">💡 Hallazgos</div>' +
+      hallazgos.map(function(h){
+        return '<div style="border:1px solid; border-radius:10px; padding:10px 12px; margin-bottom:8px; font-size:12.5px; '+(toneStyle[h.tone]||toneStyle.info)+'"><b>'+h.title+'</b><br/>'+h.text+'</div>';
+      }).join('');
+    document.getElementById('mkt-detail-overlay').style.display = 'block';
     if(window.lucide) window.lucide.createIcons();
   }
 
@@ -1115,7 +1292,7 @@
         var role = sel.value;
         var m = teamMembers.find(function(x){return x.id===id;});
         if(m) m.role = role;
-        airtableFetch('/' + TEAM_TABLE + '/' + id, {method:'PATCH', body:JSON.stringify({fields:{Role:role}})}).catch(function(err){console.error(err);});
+        airtableFetch('/' + TEAM_TABLE + '/' + id, {method:'PATCH', body:JSON.stringify({fields:{Role:role}, typecast:true})}).catch(function(err){console.error(err);});
       });
     });
     list.querySelectorAll('[data-team-del]').forEach(function(icon){
@@ -1335,6 +1512,7 @@
     var status = document.getElementById('sync-status');
     Promise.all([loadLeads(), loadMessages(), loadMappings(), loadTeam(), loadKB()]).then(function(){
       if(leads.length){ activeId = leads[0].id; }
+      autoTagLeadAttribution();
       renderChatList();
       renderChatPanel();
       renderKanban();
@@ -1816,18 +1994,13 @@
       });
   });
 
-  // MATRIX (calculada de leads reales agrupados por fuente)
+  // MATRIX (calculada de leads reales agrupados por el nivel de atribución activo)
   function renderMatrix(){
     var m = document.getElementById('matrix');
     if(!m || !leads.length) return;
     m.innerHTML = '';
-    var apptStages = ['cita','visita','separacion','venta'];
-    var bySource = {};
-    leads.forEach(function(l){
-      var src = l.source || 'sin fuente';
-      bySource[src] = bySource[src] || [];
-      bySource[src].push(l);
-    });
+    var apptStages = apptStagesGlobal;
+    var bySource = getMktGroups();
     var entries = Object.keys(bySource).map(function(src){
       var arr = bySource[src];
       var n = arr.length;
@@ -1856,6 +2029,51 @@
       document.querySelectorAll('.mkt-page').forEach(function(p){p.classList.remove('active');});
       document.getElementById('mkt-' + tab.dataset.mktTab).classList.add('active');
     });
+  });
+
+  // MARKETING: "Ver por" (nivel de agrupación de atribución)
+  document.querySelectorAll('[data-mkt-viewby]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('[data-mkt-viewby]').forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active');
+      mktViewBy = btn.dataset.mktViewby;
+      renderMatrix();
+      renderMarketingBreakdown();
+    });
+  });
+
+  // MARKETING: navegación de mes
+  var mktMonthPrev = document.getElementById('mkt-month-prev');
+  if(mktMonthPrev) mktMonthPrev.addEventListener('click', function(){
+    mktMonthAnchor = new Date(mktMonthAnchor.getFullYear(), mktMonthAnchor.getMonth()-1, 1);
+    renderMatrix();
+    renderMarketingBreakdown();
+  });
+  var mktMonthNext = document.getElementById('mkt-month-next');
+  if(mktMonthNext) mktMonthNext.addEventListener('click', function(){
+    mktMonthAnchor = new Date(mktMonthAnchor.getFullYear(), mktMonthAnchor.getMonth()+1, 1);
+    renderMatrix();
+    renderMarketingBreakdown();
+  });
+
+  // MARKETING: ordenar columnas del Desglose de Rendimiento
+  document.querySelectorAll('#mkt-breakdown-table th[data-mkt-sort]').forEach(function(th){
+    th.addEventListener('click', function(){
+      var key = th.getAttribute('data-mkt-sort');
+      if(mktSortKey === key){ mktSortDir = mktSortDir === 'asc' ? 'desc' : 'asc'; }
+      else { mktSortKey = key; mktSortDir = key==='nombre' ? 'asc' : 'desc'; }
+      renderMarketingBreakdown();
+    });
+  });
+
+  // MARKETING: cerrar panel de detalle
+  var mktDetailClose = document.getElementById('mkt-detail-close');
+  if(mktDetailClose) mktDetailClose.addEventListener('click', function(){
+    document.getElementById('mkt-detail-overlay').style.display = 'none';
+  });
+  var mktDetailOverlay = document.getElementById('mkt-detail-overlay');
+  if(mktDetailOverlay) mktDetailOverlay.addEventListener('click', function(e){
+    if(e.target === mktDetailOverlay) mktDetailOverlay.style.display = 'none';
   });
   document.querySelectorAll('[data-team-tab]').forEach(function(tab){
     tab.addEventListener('click', function(){
@@ -1902,7 +2120,7 @@
     }
     statusEl.style.color = '#64748b';
     statusEl.textContent = 'Agregando...';
-    airtableFetch('/' + TEAM_TABLE, {method:'POST', body:JSON.stringify({fields:{Name:name, Email:email, Phone:phone, Role:role, Verified:false, InRotation:false, RotationActive:false}})}).then(function(r){
+    airtableFetch('/' + TEAM_TABLE, {method:'POST', body:JSON.stringify({fields:{Name:name, Email:email, Phone:phone, Role:role, Verified:false, InRotation:false, RotationActive:false}, typecast:true})}).then(function(r){
       teamMembers.push({id:r.id, name:name, email:email, phone:phone, role:role, verified:false, inRotation:false, rotationActive:false});
       renderTeamMembers();
       statusEl.style.color = '#15803d';
