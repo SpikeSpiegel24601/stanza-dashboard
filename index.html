@@ -1787,7 +1787,7 @@
       var stage = document.getElementById('profile-stage').value;
       var discard = document.getElementById('profile-discard').value;
       var rep = document.getElementById('profile-salesrep').value;
-      var fields = { Name: name, Email: email, Phone: phone, Stage: stage, Tag: STAGE_TAGS[stage] || stage, DiscardReason: discard, SalesRep: rep };
+      var fields = { Name: name, Email: email, Phone: phone, Stage: stage, Tag: STAGE_TAGS[stage] || stage, DiscardReason: (discard || null), SalesRep: rep };
       statusEl.style.color = '#64748b';
       statusEl.textContent = 'Guardando...';
       airtableFetch('/' + LEADS_TABLE + '/' + lead.id, { method:'PATCH', body: JSON.stringify({ fields: fields, typecast: true }) })
