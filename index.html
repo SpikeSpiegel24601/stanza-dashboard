@@ -48,6 +48,42 @@
   </div>
 </div>
 
+<div id="team-modal" style="display:none; position:fixed; inset:0; z-index:9000; background:rgba(15,23,42,.5); align-items:center; justify-content:center;">
+  <div style="background:#fff; border-radius:14px; padding:28px; width:340px; max-width:90vw;">
+    <div style="font-weight:700; font-size:16px; margin-bottom:12px;" id="team-modal-title">Agregar miembro</div>
+    <label style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">Nombre</label>
+    <input type="text" id="team-add-name" placeholder="Nombre completo" style="width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:10px; font-size:13px;">
+    <label style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">Correo electrónico</label>
+    <input type="email" id="team-add-email" placeholder="correo@empresa.com" style="width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:10px; font-size:13px;">
+    <label style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">Teléfono</label>
+    <input type="text" id="team-add-phone" placeholder="+52..." style="width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:10px; font-size:13px;">
+    <label style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">Rol</label>
+    <select id="team-add-role" style="width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:14px; font-size:13px;">
+      <option value="Admin">Admin</option>
+      <option value="Asesor" selected>Asesor</option>
+      <option value="Marketing">Marketing (Solo lectura)</option>
+    </select>
+    <div style="display:flex; gap:8px;">
+      <button id="team-add-cancel" style="flex:1; padding:10px; border-radius:8px; border:1px solid #e2e8f0; background:#fff; font-weight:600; font-size:13px; cursor:pointer;">Cancelar</button>
+      <button id="team-add-confirm" style="flex:1; padding:10px; border-radius:8px; border:none; background:var(--magenta); color:#fff; font-weight:600; font-size:13px; cursor:pointer;">Agregar</button>
+    </div>
+    <div id="team-add-status" style="font-size:12px; margin-top:10px; min-height:16px;"></div>
+  </div>
+</div>
+
+<div id="rotation-add-modal" style="display:none; position:fixed; inset:0; z-index:9000; background:rgba(15,23,42,.5); align-items:center; justify-content:center;">
+  <div style="background:#fff; border-radius:14px; padding:28px; width:340px; max-width:90vw;">
+    <div style="font-weight:700; font-size:16px; margin-bottom:12px;">Agregar Asesor a la rotación</div>
+    <label style="font-size:12px; font-weight:600; display:block; margin-bottom:4px;">Miembro del equipo</label>
+    <select id="rotation-add-select" style="width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:14px; font-size:13px;"></select>
+    <div style="display:flex; gap:8px;">
+      <button id="rotation-add-cancel" style="flex:1; padding:10px; border-radius:8px; border:1px solid #e2e8f0; background:#fff; font-weight:600; font-size:13px; cursor:pointer;">Cancelar</button>
+      <button id="rotation-add-confirm" style="flex:1; padding:10px; border-radius:8px; border:none; background:var(--magenta); color:#fff; font-weight:600; font-size:13px; cursor:pointer;">Agregar</button>
+    </div>
+    <div id="rotation-add-status" style="font-size:12px; margin-top:10px; min-height:16px;"></div>
+  </div>
+</div>
+
 <div class="sidebar">
   <div class="logo">VD</div>
   <div class="nav-item active" data-page="home"><i data-lucide="home"></i><span class="tooltip">Home</span></div>
@@ -362,6 +398,18 @@
       </div>
 
       <div class="team-page active" id="team-miembros">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px;">
+          <div style="display:flex; gap:8px; flex-wrap:wrap; flex:1; min-width:240px;">
+            <input type="text" id="team-search" placeholder="Buscar por nombre, correo o teléfono..." style="flex:1; min-width:220px; padding:9px 12px; border-radius:8px; border:1px solid var(--border); font-size:13px; background:var(--card); color:var(--text);">
+            <select id="team-role-filter" class="btn" style="cursor:pointer;">
+              <option value="">Todos los roles</option>
+              <option value="Admin">Admin</option>
+              <option value="Asesor">Asesor</option>
+              <option value="Marketing">Marketing (Solo lectura)</option>
+            </select>
+          </div>
+          <button class="btn active" id="team-add-btn" style="background:var(--magenta); border-color:var(--magenta); white-space:nowrap;"><i data-lucide="user-plus" style="width:14px;height:14px;"></i> Agregar miembro</button>
+        </div>
         <div class="card" style="padding:0;">
           <div id="team-members-list"></div>
         </div>
@@ -369,9 +417,12 @@
 
       <div class="team-page" id="team-rotacion">
         <div class="card">
-          <div>
-            <b>Rotación Automática</b> <span class="muted" id="rotation-summary"></span>
-            <div class="muted" style="font-size:12px;">Los leads se distribuyen automáticamente entre asesores activos en rotación</div>
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">
+            <div>
+              <b>Rotación Automática</b> <span class="muted" id="rotation-summary"></span>
+              <div class="muted" style="font-size:12px;">Los leads se distribuyen automáticamente entre asesores activos en rotación</div>
+            </div>
+            <button class="btn active" id="team-add-rotation-btn" style="background:var(--magenta); border-color:var(--magenta); white-space:nowrap;"><i data-lucide="user-plus" style="width:14px;height:14px;"></i> Agregar Asesor</button>
           </div>
           <div id="rotation-list" style="margin-top:12px;"></div>
           <div class="card" style="background:#eff6ff; border-color:#bfdbfe; margin-top:12px; font-size:12px;">
@@ -1028,17 +1079,34 @@
     });
   }
 
+  var teamSearchQuery = '';
+  var teamRoleFilter = '';
+  var TEAM_ROLE_LABEL = {Admin:'Admin', Asesor:'Asesor', Marketing:'Marketing (Solo lectura)'};
+
   function renderTeamMembers(){
     var list = document.getElementById('team-members-list');
     if(!list) return;
     list.innerHTML = '';
-    teamMembers.forEach(function(m){
+    var q = teamSearchQuery.toLowerCase();
+    var filtered = teamMembers.filter(function(m){
+      if(teamRoleFilter && m.role !== teamRoleFilter) return false;
+      if(!q) return true;
+      return (m.name||'').toLowerCase().indexOf(q) > -1 ||
+             (m.email||'').toLowerCase().indexOf(q) > -1 ||
+             (m.phone||'').toLowerCase().indexOf(q) > -1;
+    });
+    if(!filtered.length){
+      list.innerHTML = '<div class="muted" style="padding:24px; text-align:center; font-size:13px;">No se encontraron miembros.</div>';
+      return;
+    }
+    filtered.forEach(function(m){
       var row = document.createElement('div');
       row.className = 'member-row';
       row.innerHTML =
         '<div class="avatar" style="background:var(--magenta);">'+initials(m.name)+'</div>'+
         '<div style="flex:1; min-width:180px;"><div style="font-weight:700;">'+m.name+' '+(m.verified?'<span class="pill" style="background:#dcfce7; color:#15803d;">Verificado</span>':'')+'</div><div class="muted" style="font-size:12px;">'+m.email+' · '+m.phone+'</div></div>'+
-        '<select class="btn" data-role-id="'+m.id+'" style="cursor:pointer;"><option value="Admin"'+(m.role==='Admin'?' selected':'')+'>Admin</option><option value="Asesor"'+(m.role==='Asesor'?' selected':'')+'>Asesor</option></select>';
+        '<select class="btn" data-role-id="'+m.id+'" style="cursor:pointer;"><option value="Admin"'+(m.role==='Admin'?' selected':'')+'>Admin</option><option value="Asesor"'+(m.role==='Asesor'?' selected':'')+'>Asesor</option><option value="Marketing"'+(m.role==='Marketing'?' selected':'')+'>Marketing (Solo lectura)</option></select>'+
+        '<i data-lucide="trash-2" style="width:15px;height:15px; cursor:pointer; color:#ef4444; flex-shrink:0;" data-team-del="'+m.id+'" title="Eliminar miembro"></i>';
       list.appendChild(row);
     });
     list.querySelectorAll('[data-role-id]').forEach(function(sel){
@@ -1050,6 +1118,18 @@
         airtableFetch('/' + TEAM_TABLE + '/' + id, {method:'PATCH', body:JSON.stringify({fields:{Role:role}})}).catch(function(err){console.error(err);});
       });
     });
+    list.querySelectorAll('[data-team-del]').forEach(function(icon){
+      icon.addEventListener('click', function(){
+        var id = icon.getAttribute('data-team-del');
+        var m = teamMembers.find(function(x){return x.id===id;});
+        if(!confirm('¿Eliminar a '+(m?m.name:'este miembro')+' del equipo?')) return;
+        teamMembers = teamMembers.filter(function(x){return x.id!==id;});
+        renderTeamMembers();
+        renderRotation();
+        airtableFetch('/' + TEAM_TABLE + '/' + id, {method:'DELETE'}).catch(function(err){console.error(err);});
+      });
+    });
+    if(window.lucide) window.lucide.createIcons();
   }
 
   function renderRotation(){
@@ -1067,7 +1147,8 @@
         '<span class="muted">#'+(idx+1)+'</span>'+
         '<div style="flex:1; min-width:180px;"><div style="font-weight:700;">'+m.name+'</div><div class="muted" style="font-size:12px;">'+m.phone+' · '+m.email+'</div></div>'+
         '<span class="muted" style="font-size:12px;">'+(m.rotationActive?'Activo':'Inactivo')+'</span>'+
-        '<div class="switch '+(m.rotationActive?'on':'')+'" data-rot-id="'+m.id+'" style="cursor:pointer;"><div class="knob"></div></div>';
+        '<div class="switch '+(m.rotationActive?'on':'')+'" data-rot-id="'+m.id+'" style="cursor:pointer;"><div class="knob"></div></div>'+
+        '<i data-lucide="trash-2" style="width:15px;height:15px; cursor:pointer; color:#ef4444; flex-shrink:0;" data-rot-del="'+m.id+'" title="Quitar de la rotación"></i>';
       list.appendChild(row);
     });
     list.querySelectorAll('[data-rot-id]').forEach(function(sw){
@@ -1079,6 +1160,18 @@
         airtableFetch('/' + TEAM_TABLE + '/' + id, {method:'PATCH', body:JSON.stringify({fields:{RotationActive:m.rotationActive}})}).catch(function(err){console.error(err);});
       });
     });
+    list.querySelectorAll('[data-rot-del]').forEach(function(icon){
+      icon.addEventListener('click', function(){
+        var id = icon.getAttribute('data-rot-del');
+        var m = teamMembers.find(function(x){return x.id===id;});
+        if(!m) return;
+        if(!confirm('¿Quitar a '+m.name+' de la rotación de leads?')) return;
+        m.inRotation = false;
+        renderRotation();
+        airtableFetch('/' + TEAM_TABLE + '/' + id, {method:'PATCH', body:JSON.stringify({fields:{InRotation:false}})}).catch(function(err){console.error(err);});
+      });
+    });
+    if(window.lucide) window.lucide.createIcons();
   }
 
   // SALES ASSISTANT
@@ -1770,6 +1863,102 @@
       tab.classList.add('active');
       document.querySelectorAll('.team-page').forEach(function(p){p.classList.remove('active');});
       document.getElementById('team-' + tab.dataset.teamTab).classList.add('active');
+    });
+  });
+
+  // TEAM: búsqueda + filtro de rol
+  var teamSearchEl = document.getElementById('team-search');
+  if(teamSearchEl) teamSearchEl.addEventListener('input', function(e){ teamSearchQuery = e.target.value; renderTeamMembers(); });
+  var teamRoleFilterEl = document.getElementById('team-role-filter');
+  if(teamRoleFilterEl) teamRoleFilterEl.addEventListener('change', function(e){ teamRoleFilter = e.target.value; renderTeamMembers(); });
+
+  // TEAM: modal "Agregar miembro"
+  function openTeamAddModal(){
+    document.getElementById('team-add-name').value = '';
+    document.getElementById('team-add-email').value = '';
+    document.getElementById('team-add-phone').value = '';
+    document.getElementById('team-add-role').value = 'Asesor';
+    document.getElementById('team-add-status').textContent = '';
+    document.getElementById('team-modal').style.display = 'flex';
+  }
+  function closeTeamAddModal(){
+    document.getElementById('team-modal').style.display = 'none';
+  }
+  var teamAddBtn = document.getElementById('team-add-btn');
+  if(teamAddBtn) teamAddBtn.addEventListener('click', openTeamAddModal);
+  var teamAddCancel = document.getElementById('team-add-cancel');
+  if(teamAddCancel) teamAddCancel.addEventListener('click', closeTeamAddModal);
+  var teamAddConfirm = document.getElementById('team-add-confirm');
+  if(teamAddConfirm) teamAddConfirm.addEventListener('click', function(){
+    var name = document.getElementById('team-add-name').value.trim();
+    var email = document.getElementById('team-add-email').value.trim();
+    var phone = document.getElementById('team-add-phone').value.trim();
+    var role = document.getElementById('team-add-role').value;
+    var statusEl = document.getElementById('team-add-status');
+    if(!name || !email){
+      statusEl.style.color = '#dc2626';
+      statusEl.textContent = 'Nombre y correo son obligatorios.';
+      return;
+    }
+    statusEl.style.color = '#64748b';
+    statusEl.textContent = 'Agregando...';
+    airtableFetch('/' + TEAM_TABLE, {method:'POST', body:JSON.stringify({fields:{Name:name, Email:email, Phone:phone, Role:role, Verified:false, InRotation:false, RotationActive:false}})}).then(function(r){
+      teamMembers.push({id:r.id, name:name, email:email, phone:phone, role:role, verified:false, inRotation:false, rotationActive:false});
+      renderTeamMembers();
+      statusEl.style.color = '#15803d';
+      statusEl.textContent = 'Miembro agregado ✓';
+      setTimeout(closeTeamAddModal, 800);
+    }).catch(function(err){
+      console.error(err);
+      statusEl.style.color = '#dc2626';
+      statusEl.textContent = 'No se pudo agregar: ' + err.message;
+    });
+  });
+
+  // TEAM: modal "Agregar Asesor" (rotación)
+  function openRotationAddModal(){
+    var sel = document.getElementById('rotation-add-select');
+    var available = teamMembers.filter(function(m){ return !m.inRotation; });
+    if(!available.length){
+      sel.innerHTML = '<option value="">Todos los miembros ya están en la rotación</option>';
+    } else {
+      sel.innerHTML = available.map(function(m){ return '<option value="'+m.id+'">'+m.name+' ('+m.email+')</option>'; }).join('');
+    }
+    document.getElementById('rotation-add-status').textContent = '';
+    document.getElementById('rotation-add-modal').style.display = 'flex';
+  }
+  function closeRotationAddModal(){
+    document.getElementById('rotation-add-modal').style.display = 'none';
+  }
+  var teamAddRotationBtn = document.getElementById('team-add-rotation-btn');
+  if(teamAddRotationBtn) teamAddRotationBtn.addEventListener('click', openRotationAddModal);
+  var rotationAddCancel = document.getElementById('rotation-add-cancel');
+  if(rotationAddCancel) rotationAddCancel.addEventListener('click', closeRotationAddModal);
+  var rotationAddConfirm = document.getElementById('rotation-add-confirm');
+  if(rotationAddConfirm) rotationAddConfirm.addEventListener('click', function(){
+    var sel = document.getElementById('rotation-add-select');
+    var id = sel.value;
+    var statusEl = document.getElementById('rotation-add-status');
+    if(!id){
+      statusEl.style.color = '#dc2626';
+      statusEl.textContent = 'No hay miembro para agregar.';
+      return;
+    }
+    var m = teamMembers.find(function(x){return x.id===id;});
+    if(!m) return;
+    statusEl.style.color = '#64748b';
+    statusEl.textContent = 'Agregando...';
+    airtableFetch('/' + TEAM_TABLE + '/' + id, {method:'PATCH', body:JSON.stringify({fields:{InRotation:true, RotationActive:true}})}).then(function(){
+      m.inRotation = true;
+      m.rotationActive = true;
+      renderRotation();
+      statusEl.style.color = '#15803d';
+      statusEl.textContent = 'Asesor agregado ✓';
+      setTimeout(closeRotationAddModal, 800);
+    }).catch(function(err){
+      console.error(err);
+      statusEl.style.color = '#dc2626';
+      statusEl.textContent = 'No se pudo agregar: ' + err.message;
     });
   });
   document.querySelectorAll('[data-sa-tab]').forEach(function(tab){
