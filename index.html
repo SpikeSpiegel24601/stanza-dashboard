@@ -119,38 +119,35 @@
           <h1>Bienvenido, Arturo Lopez</h1>
           <div class="muted" id="sync-status" style="margin-top:4px;">Conectando con Airtable…</div>
         </div>
-        <div style="display:flex; gap:8px;">
-          <button class="btn active">Nuevos</button>
-          <button class="btn">Activos</button>
-          <button class="btn"><i data-lucide="calendar" style="width:14px;height:14px;vertical-align:-2px;"></i> julio 2026</button>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <button class="btn active" data-home-mode="nuevos">Nuevos</button>
+          <button class="btn" data-home-mode="activos">Activos</button>
+          <button class="btn" id="home-month-prev" style="padding:6px 10px;"><i data-lucide="chevron-left" style="width:14px;height:14px;"></i></button>
+          <button class="btn" style="pointer-events:none;"><i data-lucide="calendar" style="width:14px;height:14px;vertical-align:-2px;"></i> <span id="home-month-label">julio 2026</span></button>
+          <button class="btn" id="home-month-next" style="padding:6px 10px;"><i data-lucide="chevron-right" style="width:14px;height:14px;"></i></button>
         </div>
       </div>
 
       <div class="stat-grid">
-        <div class="stat-card"><div class="stat-icon" style="background:#fbe6f5; color:var(--magenta);"><i data-lucide="users"></i></div><div class="label">Leads totales</div><div class="value" id="stat-total">–</div><div class="muted" style="font-size:11px;">leads nuevos</div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#fbe6f5; color:var(--magenta);"><i data-lucide="users"></i></div><div class="label">Leads totales</div><div class="value" id="stat-total">–</div><div class="muted" style="font-size:11px;" id="stat-total-label">leads nuevos</div></div>
         <div class="stat-card"><div class="stat-icon" style="background:#dbeafe; color:var(--blue);"><i data-lucide="phone"></i></div><div class="label">Tasa de Contactos</div><div class="value" id="stat-contact-rate">–</div><div class="delta" id="stat-contact-count">– leads</div></div>
         <div class="stat-card"><div class="stat-icon" style="background:#ffedd5; color:#c2410c;"><i data-lucide="target"></i></div><div class="label">Tasa de Calificados</div><div class="value" id="stat-qualified-rate">–</div><div class="delta" id="stat-qualified-count">– leads</div></div>
         <div class="stat-card"><div class="stat-icon" style="background:#ede9fe; color:var(--purple);"><i data-lucide="calendar"></i></div><div class="label">Tasa de Citas</div><div class="value" id="stat-appt-rate">–</div><div class="delta" id="stat-appt-count">– leads</div></div>
-        <div class="stat-card"><div class="stat-icon" style="background:#dcfce7; color:#15803d;"><i data-lucide="footprints"></i></div><div class="label">Tasa de Visitas</div><div class="value">0.0%</div><div class="muted" style="font-size:11px;">0 leads · sin datos aún</div></div>
-        <div class="stat-card"><div class="stat-icon" style="background:#ccfbf1; color:#0f766e;"><i data-lucide="clipboard-check"></i></div><div class="label">Tasa de Separaciones</div><div class="value">0.0%</div><div class="muted" style="font-size:11px;">0 leads · sin datos aún</div></div>
-        <div class="stat-card"><div class="stat-icon" style="background:#dbeafe; color:#1e3a8a;"><i data-lucide="shopping-cart"></i></div><div class="label">Tasa de Ventas</div><div class="value">0.0%</div><div class="muted" style="font-size:11px;">0 leads · sin datos aún</div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#dcfce7; color:#15803d;"><i data-lucide="footprints"></i></div><div class="label">Tasa de Visitas</div><div class="value" id="stat-visit-rate">–</div><div class="delta" id="stat-visit-count">– leads</div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#ccfbf1; color:#0f766e;"><i data-lucide="clipboard-check"></i></div><div class="label">Tasa de Separaciones</div><div class="value" id="stat-sep-rate">–</div><div class="delta" id="stat-sep-count">– leads</div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#dbeafe; color:#1e3a8a;"><i data-lucide="shopping-cart"></i></div><div class="label">Tasa de Ventas</div><div class="value" id="stat-sale-rate">–</div><div class="delta" id="stat-sale-count">– leads</div></div>
       </div>
 
       <div class="grid3">
         <div class="card">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
             <h2 class="section" style="margin-bottom:0;">Embudo de ventas</h2>
-            <select class="btn" style="cursor:pointer;">
-              <option>Cronológico</option>
-              <option>Por conversión</option>
+            <select class="btn" id="home-funnel-order" style="cursor:pointer;">
+              <option value="cronologico">Cronológico</option>
+              <option value="conversion">Por conversión</option>
             </select>
           </div>
-          <div class="funnel-row"><div class="funnel-label">Nuevo Lead</div><div class="funnel-bar-track"><div class="funnel-bar-fill" id="funnel-fill-nuevo" style="width:0%; background:var(--blue);"></div></div><div class="funnel-val" id="funnel-val-nuevo">–</div></div>
-          <div class="funnel-row"><div class="funnel-label">No Contesto</div><div class="funnel-bar-track"><div class="funnel-bar-fill" style="width:0%; background:var(--muted);"></div></div><div class="funnel-val">0 (0.0%)</div></div>
-          <div class="funnel-row"><div class="funnel-label">Contactado</div><div class="funnel-bar-track"><div class="funnel-bar-fill" id="funnel-fill-contactado" style="width:0%; background:var(--magenta);"></div></div><div class="funnel-val" id="funnel-val-contactado">–</div></div>
-          <div class="funnel-row"><div class="funnel-label">Interesado</div><div class="funnel-bar-track"><div class="funnel-bar-fill" id="funnel-fill-interesado" style="width:0%; background:var(--amber);"></div></div><div class="funnel-val" id="funnel-val-interesado">–</div></div>
-          <div class="funnel-row"><div class="funnel-label">Cita</div><div class="funnel-bar-track"><div class="funnel-bar-fill" id="funnel-fill-cita" style="width:0%; background:var(--purple);"></div></div><div class="funnel-val" id="funnel-val-cita">–</div></div>
-          <div class="funnel-row"><div class="funnel-label">Desperfilado</div><div class="funnel-bar-track"><div class="funnel-bar-fill" id="funnel-fill-desperfilado" style="width:0%; background:var(--red);"></div></div><div class="funnel-val" id="funnel-val-desperfilado">–</div></div>
+          <div id="home-funnel"></div>
         </div>
 
         <div style="display:flex; flex-direction:column; gap:16px;">
@@ -800,6 +797,9 @@
   var mktSortKey = 'n';
   var mktSortDir = 'desc';
   var MKT_MONTH_NAMES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  var homeMode = 'nuevos';
+  var homeMonthAnchor = new Date();
+  var homeFunnelOrder = 'cronologico';
   var contactsPage = 0, contactsPageSize = 10, contactsSearch = '', contactsStageFilter = '', contactsSort = {key:'created', dir:'desc'};
   var campaignMappings = [], teamMembers = [], knowledgeBase = [];
 
@@ -1072,6 +1072,20 @@
       if(!l.created) return false;
       var d = new Date(l.created);
       return d.getFullYear() === y && d.getMonth() === mo;
+    });
+  }
+
+  // Leads del mes seleccionado en el Home, según el modo Nuevos/Activos.
+  // "Nuevos" = creados dentro del mes. "Activos" = creados dentro del mes
+  // y que no estén Desperfilados (misma regla que ya usa el filtro del Kanban).
+  function homeFilteredLeads(){
+    var y = homeMonthAnchor.getFullYear(), mo = homeMonthAnchor.getMonth();
+    return leads.filter(function(l){
+      if(!l.created) return false;
+      var d = new Date(l.created);
+      if(d.getFullYear() !== y || d.getMonth() !== mo) return false;
+      if(homeMode === 'activos' && l.stage === 'desperfilado') return false;
+      return true;
     });
   }
 
@@ -1486,26 +1500,61 @@
   }
 
   function renderHomeStats(){
-    var total = leads.length;
-    var contacted = leads.filter(function(l){ return l.stage === 'contactado' || l.stage === 'interesado' || l.stage === 'cita'; }).length;
-    var qualified = leads.filter(function(l){ return l.stage === 'interesado' || l.stage === 'cita'; }).length;
-    var appts = leads.filter(function(l){ return l.stage === 'cita'; }).length;
+    var monthLabel = document.getElementById('home-month-label');
+    if(monthLabel) monthLabel.textContent = MKT_MONTH_NAMES[homeMonthAnchor.getMonth()] + ' ' + homeMonthAnchor.getFullYear();
+
+    var scoped = homeFilteredLeads();
+    var total = scoped.length;
+    var advanced = ['contactado','interesado','cita','visita','separacion','venta'];
+    var qualifiedStages = ['interesado','cita','visita','separacion','venta'];
+    var apptStages = ['cita','visita','separacion','venta'];
+    var visitStages = ['visita','separacion','venta'];
+    var sepStages = ['separacion','venta'];
+    var contacted = scoped.filter(function(l){ return advanced.indexOf(l.stage)>-1; }).length;
+    var qualified = scoped.filter(function(l){ return qualifiedStages.indexOf(l.stage)>-1; }).length;
+    var appts = scoped.filter(function(l){ return apptStages.indexOf(l.stage)>-1; }).length;
+    var visits = scoped.filter(function(l){ return visitStages.indexOf(l.stage)>-1; }).length;
+    var seps = scoped.filter(function(l){ return sepStages.indexOf(l.stage)>-1; }).length;
+    var sales = scoped.filter(function(l){ return l.stage === 'venta'; }).length;
+
+    var pct = function(n){ return total ? (Math.round((n/total)*1000)/10) + '%' : '0%'; };
     document.getElementById('stat-total').textContent = total;
-    document.getElementById('stat-contact-rate').textContent = total ? (Math.round((contacted/total)*1000)/10) + '%' : '0%';
-    document.getElementById('stat-qualified-rate').textContent = total ? (Math.round((qualified/total)*1000)/10) + '%' : '0%';
-    document.getElementById('stat-appt-rate').textContent = total ? (Math.round((appts/total)*1000)/10) + '%' : '0%';
+    var totalLabelEl = document.getElementById('stat-total-label');
+    if(totalLabelEl) totalLabelEl.textContent = homeMode === 'activos' ? 'leads activos' : 'leads nuevos';
+    document.getElementById('stat-contact-rate').textContent = pct(contacted);
+    document.getElementById('stat-qualified-rate').textContent = pct(qualified);
+    document.getElementById('stat-appt-rate').textContent = pct(appts);
+    document.getElementById('stat-visit-rate').textContent = pct(visits);
+    document.getElementById('stat-sep-rate').textContent = pct(seps);
+    document.getElementById('stat-sale-rate').textContent = pct(sales);
     document.getElementById('stat-contact-count').textContent = contacted + ' leads';
     document.getElementById('stat-qualified-count').textContent = qualified + ' leads';
     document.getElementById('stat-appt-count').textContent = appts + ' leads';
+    document.getElementById('stat-visit-count').textContent = visits + ' leads';
+    document.getElementById('stat-sep-count').textContent = seps + ' leads';
+    document.getElementById('stat-sale-count').textContent = sales + ' leads';
 
-    ['nuevo','contactado','interesado','cita','desperfilado'].forEach(function(stage){
-      var count = leads.filter(function(l){ return l.stage === stage; }).length;
-      var pct = total ? Math.round((count/total)*1000)/10 : 0;
-      var fill = document.getElementById('funnel-fill-'+stage);
-      var val = document.getElementById('funnel-val-'+stage);
-      if(fill) fill.style.width = pct + '%';
-      if(val) val.textContent = count + ' (' + pct + '%)';
-    });
+    var steps = [
+      {stage:'nuevo', label:'Nuevo Lead', count:scoped.filter(function(l){return l.stage==='nuevo';}).length, color:'var(--blue)'},
+      {stage:'no_contesto', label:'No Contesto', count:scoped.filter(function(l){return l.stage==='no_contesto';}).length, color:'var(--muted)'},
+      {stage:'contactado', label:'Contactado', count:scoped.filter(function(l){return l.stage==='contactado';}).length, color:'var(--magenta)'},
+      {stage:'interesado', label:'Interesado', count:scoped.filter(function(l){return l.stage==='interesado';}).length, color:'var(--amber)'},
+      {stage:'cita', label:'Cita', count:scoped.filter(function(l){return l.stage==='cita';}).length, color:'var(--purple)'},
+      {stage:'visita', label:'Visita', count:visits, color:'var(--green)'},
+      {stage:'separacion', label:'Separación', count:seps, color:'#0f766e'},
+      {stage:'venta', label:'Venta', count:sales, color:'#1e3a8a'},
+      {stage:'desperfilado', label:'Desperfilado', count:scoped.filter(function(l){return l.stage==='desperfilado';}).length, color:'var(--red)'},
+    ];
+    if(homeFunnelOrder === 'conversion'){
+      steps = steps.slice().sort(function(a,b){ return b.count - a.count; });
+    }
+    var el = document.getElementById('home-funnel');
+    if(el){
+      el.innerHTML = steps.map(function(s){
+        var p = total ? Math.round((s.count/total)*1000)/10 : 0;
+        return '<div class="funnel-row"><div class="funnel-label">'+s.label+'</div><div class="funnel-bar-track"><div class="funnel-bar-fill" style="width:'+p+'%; background:'+s.color+';"></div></div><div class="funnel-val">'+s.count+' ('+p+'%)</div></div>';
+      }).join('');
+    }
   }
 
   function init(){
@@ -2197,6 +2246,32 @@
       renderKanban();
     });
   });
+
+  // HOME: toggle Nuevos/Activos + navegación de mes + orden del embudo
+  document.querySelectorAll('[data-home-mode]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('[data-home-mode]').forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active');
+      homeMode = btn.dataset.homeMode;
+      renderHomeStats();
+    });
+  });
+  var homeMonthPrev = document.getElementById('home-month-prev');
+  if(homeMonthPrev) homeMonthPrev.addEventListener('click', function(){
+    homeMonthAnchor = new Date(homeMonthAnchor.getFullYear(), homeMonthAnchor.getMonth()-1, 1);
+    renderHomeStats();
+  });
+  var homeMonthNext = document.getElementById('home-month-next');
+  if(homeMonthNext) homeMonthNext.addEventListener('click', function(){
+    homeMonthAnchor = new Date(homeMonthAnchor.getFullYear(), homeMonthAnchor.getMonth()+1, 1);
+    renderHomeStats();
+  });
+  var homeFunnelOrderSel = document.getElementById('home-funnel-order');
+  if(homeFunnelOrderSel) homeFunnelOrderSel.addEventListener('change', function(){
+    homeFunnelOrder = homeFunnelOrderSel.value;
+    renderHomeStats();
+  });
+
   var kanbanDownloadBtn = document.getElementById('kanban-download');
   if(kanbanDownloadBtn) kanbanDownloadBtn.addEventListener('click', function(){
     var rows = leads.map(function(l){ return {Nombre:l.name, Telefono:l.phone, Etapa:l.tag, Propiedad:l.propiedad, Fuente:l.source}; });
