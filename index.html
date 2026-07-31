@@ -213,7 +213,7 @@
               <span class="chat-crm-pill" id="chat-crm-pill"><i data-lucide="check" style="width:11px;height:11px;"></i> CRM Actualizado</span>
               <span class="muted" style="font-size:12px; display:flex; align-items:center; gap:4px;"><i data-lucide="message-circle" style="width:13px;height:13px;"></i><span id="chat-msg-count">0</span></span>
               <button class="btn" id="chat-schedule-btn" style="display:flex; align-items:center; gap:4px; padding:4px 10px; font-size:11px; white-space:nowrap;"><i data-lucide="calendar-plus" style="width:13px;height:13px;"></i> Agendar cita</button>
-              <i data-lucide="user" id="chat-profile-btn" style="width:15px;height:15px; color:var(--muted); cursor:pointer;"></i>
+              <button class="btn" id="chat-profile-btn" style="padding:6px 8px; display:flex; align-items:center;"><i data-lucide="user" style="width:14px;height:14px;"></i></button>
             </div>
           </div>
           <div class="chat-messages" id="chat-messages"></div>
@@ -236,7 +236,7 @@
                 <div class="muted" style="font-size:11px;" id="chat-profile-phone">-</div>
               </div>
             </div>
-            <i data-lucide="x" style="cursor:pointer;" id="chat-profile-close"></i>
+            <button id="chat-profile-close" style="background:none; border:none; cursor:pointer; padding:4px; color:var(--text);"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
           </div>
           <div style="display:flex; gap:4px; border-bottom:1px solid var(--border); margin-bottom:16px;">
             <button class="btn active" data-profile-tab="resumen" style="border:none; border-radius:0; border-bottom:2px solid var(--purple); background:none;">Resumen</button>
