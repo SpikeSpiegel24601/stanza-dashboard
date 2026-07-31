@@ -2590,10 +2590,19 @@
     if(homeRangeEndInput) homeRangeEndInput.value = homeFmtISO(homeRangeEnd);
     if(homeCompareToggle) homeCompareToggle.checked = homeCompareEnabled;
     if(homeCompareFields) homeCompareFields.style.display = homeCompareEnabled ? 'block' : 'none';
-    // Rango de comparación por defecto: el periodo inmediatamente anterior de igual duración.
-    var spanDays = Math.round((homeRangeEnd - homeRangeStart) / 86400000) + 1;
-    var defaultCompareEnd = new Date(homeRangeStart); defaultCompareEnd.setDate(defaultCompareEnd.getDate()-1);
-    var defaultCompareStart = new Date(defaultCompareEnd); defaultCompareStart.setDate(defaultCompareStart.getDate()-(spanDays-1));
+    // Rango de comparación por defecto: si el periodo elegido es un mes completo,
+    // compara contra el mes calendario anterior; si no, contra el periodo
+    // inmediatamente anterior de igual duración (en días).
+    var isFullMonth = homeRangeStart.getDate()===1 && homeRangeEnd.getDate()===new Date(homeRangeEnd.getFullYear(), homeRangeEnd.getMonth()+1, 0).getDate() && homeRangeStart.getMonth()===homeRangeEnd.getMonth() && homeRangeStart.getFullYear()===homeRangeEnd.getFullYear();
+    var defaultCompareStart, defaultCompareEnd;
+    if(isFullMonth){
+      defaultCompareStart = new Date(homeRangeStart.getFullYear(), homeRangeStart.getMonth()-1, 1);
+      defaultCompareEnd = new Date(homeRangeStart.getFullYear(), homeRangeStart.getMonth(), 0);
+    } else {
+      var spanDays = Math.round((homeRangeEnd - homeRangeStart) / 86400000) + 1;
+      defaultCompareEnd = new Date(homeRangeStart); defaultCompareEnd.setDate(defaultCompareEnd.getDate()-1);
+      defaultCompareStart = new Date(defaultCompareEnd); defaultCompareStart.setDate(defaultCompareStart.getDate()-(spanDays-1));
+    }
     if(homeCompareStartInput) homeCompareStartInput.value = homeFmtISO(homeCompareStart || defaultCompareStart);
     if(homeCompareEndInput) homeCompareEndInput.value = homeFmtISO(homeCompareEnd || defaultCompareEnd);
   }
